@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<GridPane hgap="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="600.0" vgap="8.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.turo.pushy.console.ConnectionSettingsController">
+  <columnConstraints>
+    <ColumnConstraints halignment="RIGHT" hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+  </rowConstraints>
+   <children>
+      <Label text="APNs server" />
+      <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1">
+         <children>
+            <ComboBox fx:id="apnsServer" maxWidth="1.7976931348623157E308" prefWidth="270.0" GridPane.columnIndex="1" HBox.hgrow="ALWAYS" />
+            <Label maxWidth="-Infinity" minWidth="-Infinity" text="Port" HBox.hgrow="NEVER" />
+            <ComboBox fx:id="apnsPort" minWidth="-Infinity" prefWidth="80.0" HBox.hgrow="NEVER" />
+         </children>
+      </HBox>
+      <Label text="Credentials" GridPane.rowIndex="1" />
+      <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+         <children>
+            <TextField fx:id="apnsCredentialFile" editable="false" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" HBox.hgrow="ALWAYS" />
+            <Button maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleBrowseButtonAction" text="Browse…" HBox.hgrow="NEVER" />
+         </children>
+      </HBox>
+      <Label fx:id="keyIdLabel" disable="true" text="Key ID" GridPane.rowIndex="2" />
+      <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+         <children>
+            <TextField fx:id="keyIdTextField" disable="true" prefWidth="212.0" />
+            <Label fx:id="teamIdLabel" disable="true" maxWidth="-Infinity" minWidth="-Infinity" text="Team ID" />
+            <TextField fx:id="teamIdTextField" disable="true" prefWidth="211.0" />
+         </children>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
+</GridPane>
