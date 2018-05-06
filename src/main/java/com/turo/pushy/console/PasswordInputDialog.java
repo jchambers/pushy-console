@@ -22,15 +22,11 @@ public class PasswordInputDialog extends Dialog<String> {
 
     private final Label incorrectPasswordLabel;
 
-    private final Function<String, Boolean> passwordVerificationFunction;
-
     public PasswordInputDialog() {
         this((password) -> true);
     }
 
     public PasswordInputDialog(final Function<String, Boolean> passwordVerificationFunction) {
-        this.passwordVerificationFunction = passwordVerificationFunction;
-
         final DialogPane dialogPane = getDialogPane();
         dialogPane.contentTextProperty().addListener(o -> updateGrid());
 

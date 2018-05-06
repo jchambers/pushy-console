@@ -14,6 +14,8 @@ public class PushyConsoleApplication extends Application {
 
     public void start(final Stage primaryStage) throws Exception {
         final Parent root = FXMLLoader.load(getClass().getResource("main.fxml"));
+
+        // TODO Localize
         primaryStage.setTitle("Pushy Console");
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
