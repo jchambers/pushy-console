@@ -13,7 +13,7 @@ public class PushyConsoleApplication extends Application {
     }
 
     public void start(final Stage primaryStage) throws Exception {
-        final Parent root = FXMLLoader.load(getClass().getResource("connection.fxml"));
+        final Parent root = FXMLLoader.load(getClass().getResource("main.fxml"));
         primaryStage.setTitle("Pushy Console");
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
