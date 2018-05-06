@@ -25,28 +25,18 @@ import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ConnectionSettingsController implements Initializable {
+public class ComposeNotificationController implements Initializable {
 
-    @FXML
-    private ComboBox<String> apnsServer;
+    @FXML private ComboBox<String> apnsServerComboBox;
+    @FXML private ComboBox<Integer> apnsPortComboBox;
+    @FXML private TextField apnsCredentialFileTextField;
 
-    @FXML
-    private ComboBox<Integer> apnsPort;
+    @FXML private Label keyIdLabel;
+    @FXML private TextField keyIdTextField;
+    @FXML private Label teamIdLabel;
+    @FXML private TextField teamIdTextField;
 
-    @FXML
-    private TextField apnsCredentialFile;
-
-    @FXML
-    private Label keyIdLabel;
-
-    @FXML
-    private TextField keyIdTextField;
-
-    @FXML
-    private Label teamIdLabel;
-
-    @FXML
-    private TextField teamIdTextField;
+    @FXML private ComboBox<String> deliveryPriorityComboBox;
 
     private String certificatePassword;
 
@@ -54,17 +44,25 @@ public class ConnectionSettingsController implements Initializable {
             Pattern.compile("^APNsAuthKey_([A-Z0-9]{10}).p8$", Pattern.CASE_INSENSITIVE);
 
     public void initialize(final URL location, final ResourceBundle resources) {
-        this.apnsServer.setItems(FXCollections.observableArrayList(
+        this.apnsServerComboBox.setItems(FXCollections.observableArrayList(
                 ApnsClientBuilder.DEVELOPMENT_APNS_HOST,
                 ApnsClientBuilder.PRODUCTION_APNS_HOST));
 
-        this.apnsServer.setValue(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
+        this.apnsServerComboBox.setValue(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
 
-        this.apnsPort.setItems(FXCollections.observableArrayList(
+        this.apnsPortComboBox.setItems(FXCollections.observableArrayList(
                 ApnsClientBuilder.DEFAULT_APNS_PORT,
                 ApnsClientBuilder.ALTERNATE_APNS_PORT));
 
-        this.apnsPort.setValue(ApnsClientBuilder.DEFAULT_APNS_PORT);
+        this.apnsPortComboBox.setValue(ApnsClientBuilder.DEFAULT_APNS_PORT);
+
+        // TODO Localize
+        this.deliveryPriorityComboBox.setItems(FXCollections.observableArrayList(
+                "Immediate",
+                "Conserve power"
+        ));
+
+        this.deliveryPriorityComboBox.setValue("Immediate");
     }
 
     @FXML
@@ -84,7 +82,7 @@ public class ConnectionSettingsController implements Initializable {
                 ApnsSigningKey.loadFromPkcs8File(file, "temp", "temp");
 
                 this.certificatePassword = null;
-                this.apnsCredentialFile.setText(file.getAbsolutePath());
+                this.apnsCredentialFileTextField.setText(file.getAbsolutePath());
 
                 this.keyIdLabel.setDisable(false);
                 this.keyIdTextField.setDisable(false);
@@ -111,7 +109,7 @@ public class ConnectionSettingsController implements Initializable {
 
                 verifiedPassword.ifPresent(password -> {
                     this.certificatePassword = password;
-                    this.apnsCredentialFile.setText(file.getAbsolutePath());
+                    this.apnsCredentialFileTextField.setText(file.getAbsolutePath());
 
                     this.keyIdTextField.clear();
                     this.teamIdTextField.clear();

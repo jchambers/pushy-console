@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="600.0" spacing="10.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.turo.pushy.console.PushyConsoleController">
+   <children>
+      <fx:include source="compose-notification.fxml" />
+      <AnchorPane VBox.vgrow="NEVER">
+         <children>
+            <Button defaultButton="true" layoutX="527.0" layoutY="87.0" mnemonicParsing="false" text="Send notification" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+         </children>
+         <padding>
+            <Insets right="10.0" />
+         </padding>
+      </AnchorPane>
+      <TableView prefHeight="200.0" prefWidth="200.0" tableMenuButtonVisible="true" VBox.vgrow="ALWAYS">
+        <columns>
+          <TableColumn prefWidth="75.0" text="Notification">
+               <columns>
+                  <TableColumn prefWidth="75.0" text="Topic" />
+                  <TableColumn prefWidth="75.0" text="Device token" />
+                  <TableColumn prefWidth="75.0" text="Payload" />
+                  <TableColumn prefWidth="75.0" text="Priority" />
+               </columns></TableColumn>
+          <TableColumn prefWidth="75.0" text="Response">
+               <columns>
+                  <TableColumn prefWidth="75.0" text="Status" />
+                  <TableColumn prefWidth="75.0" text="Details" />
+                  <TableColumn prefWidth="75.0" text="APNs ID" />
+               </columns></TableColumn>
+        </columns>
+      </TableView>
+   </children>
+</VBox>
