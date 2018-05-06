@@ -1,7 +1,11 @@
 package com.turo.pushy.console;
 
+import com.turo.pushy.apns.ApnsClient;
 import com.turo.pushy.apns.ApnsClientBuilder;
+import com.turo.pushy.apns.ApnsPushNotification;
+import com.turo.pushy.apns.DeliveryPriority;
 import com.turo.pushy.apns.auth.ApnsSigningKey;
+import com.turo.pushy.apns.util.SimpleApnsPushNotification;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -9,6 +13,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 
@@ -18,10 +23,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.*;
 import java.security.cert.CertificateException;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,16 +35,52 @@ public class ComposeNotificationController implements Initializable {
     @FXML private TextField apnsCredentialFileTextField;
 
     @FXML private Label keyIdLabel;
-    @FXML private TextField keyIdTextField;
+    @FXML private ComboBox<String> keyIdComboBox;
     @FXML private Label teamIdLabel;
-    @FXML private TextField teamIdTextField;
+    @FXML private ComboBox<String> teamIdComboBox;
 
+    @FXML private ComboBox<String> topicComboBox;
+    @FXML private ComboBox<String> deviceTokenComboBox;
+    @FXML private ComboBox<String> collapseIdComboBox;
     @FXML private ComboBox<String> deliveryPriorityComboBox;
+    @FXML private TextArea payloadTextArea;
 
     private String certificatePassword;
 
     private static final Pattern APNS_SIGNING_KEY_WITH_ID_PATTERN =
             Pattern.compile("^APNsAuthKey_([A-Z0-9]{10}).p8$", Pattern.CASE_INSENSITIVE);
+
+    public ApnsClient buildClient() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
+        final ApnsClientBuilder builder = new ApnsClientBuilder();
+
+        builder.setApnsServer(this.apnsServerComboBox.getValue(), this.apnsPortComboBox.getValue());
+
+        if (this.certificatePassword != null) {
+            builder.setClientCredentials(new File(this.apnsCredentialFileTextField.getText()), this.certificatePassword);
+        } else {
+            builder.setSigningKey(ApnsSigningKey.loadFromPkcs8File(new File(this.apnsCredentialFileTextField.getText()),
+                    this.teamIdComboBox.getValue(), this.keyIdComboBox.getValue()));
+        }
+
+        return builder.build();
+    }
+
+    public ApnsPushNotification buildPushNotification() {
+        // TODO Localize
+        final DeliveryPriority deliveryPriority = "Conserve power".equals(deliveryPriorityComboBox.getValue()) ?
+                DeliveryPriority.CONSERVE_POWER : DeliveryPriority.IMMEDIATE;
+
+        final String collapseId = collapseIdComboBox.getValue() == null || collapseIdComboBox.getValue().trim().isEmpty() ?
+                null : collapseIdComboBox.getValue();
+
+        return new SimpleApnsPushNotification(
+                this.deviceTokenComboBox.getValue(),
+                this.topicComboBox.getValue(),
+                this.payloadTextArea.getText(),
+                new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1)),
+                deliveryPriority,
+                collapseId);
+    }
 
     public void initialize(final URL location, final ResourceBundle resources) {
         this.apnsServerComboBox.setItems(FXCollections.observableArrayList(
@@ -85,17 +124,19 @@ public class ComposeNotificationController implements Initializable {
                 this.apnsCredentialFileTextField.setText(file.getAbsolutePath());
 
                 this.keyIdLabel.setDisable(false);
-                this.keyIdTextField.setDisable(false);
+                this.keyIdComboBox.setDisable(false);
                 this.teamIdLabel.setDisable(false);
-                this.teamIdTextField.setDisable(false);
+                this.teamIdComboBox.setDisable(false);
 
                 final Matcher matcher = APNS_SIGNING_KEY_WITH_ID_PATTERN.matcher(file.getName());
 
                 if (matcher.matches()) {
-                    this.keyIdTextField.setText(matcher.group(1));
-                    this.teamIdTextField.requestFocus();
+                    if (keyIdComboBox.getValue() == null || keyIdComboBox.getValue().trim().isEmpty()) {
+                        this.keyIdComboBox.setValue(matcher.group(1));
+                        this.teamIdComboBox.requestFocus();
+                    }
                 } else {
-                    this.keyIdTextField.requestFocus();
+                    this.keyIdComboBox.requestFocus();
                 }
             } catch (final NoSuchAlgorithmException | IOException | InvalidKeyException e) {
                 // Couldn't load the given file as a signing key. Try it as a P12 certificate instead.
@@ -111,13 +152,13 @@ public class ComposeNotificationController implements Initializable {
                     this.certificatePassword = password;
                     this.apnsCredentialFileTextField.setText(file.getAbsolutePath());
 
-                    this.keyIdTextField.clear();
-                    this.teamIdTextField.clear();
+                    this.keyIdComboBox.setValue(null);
+                    this.teamIdComboBox.setValue(null);
 
                     this.keyIdLabel.setDisable(true);
-                    this.keyIdTextField.setDisable(true);
+                    this.keyIdComboBox.setDisable(true);
                     this.teamIdLabel.setDisable(true);
-                    this.teamIdTextField.setDisable(true);
+                    this.teamIdComboBox.setDisable(true);
                 });
             }
         }

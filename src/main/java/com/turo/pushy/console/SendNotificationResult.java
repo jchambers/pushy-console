@@ -19,7 +19,7 @@ public class SendNotificationResult {
     }
 
     public String getPayload() {
-        return this.response.getPushNotification().getPayload();
+        return this.response.getPushNotification().getPayload().replace('\n', ' ');
     }
 
     public String getPriority() {

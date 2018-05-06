@@ -47,20 +47,20 @@
          </children>
       </HBox>
       <Label fx:id="keyIdLabel" disable="true" text="Key ID" GridPane.rowIndex="2" />
-      <TextField fx:id="keyIdTextField" disable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
+      <ComboBox fx:id="keyIdComboBox" disable="true" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
       <Label fx:id="teamIdLabel" disable="true" text="Team ID" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-      <TextField fx:id="teamIdTextField" disable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
+      <ComboBox fx:id="teamIdComboBox" disable="true" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
       <Separator prefWidth="200.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="3" />
       <Label text="Topic" GridPane.rowIndex="4" />
-      <ComboBox editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
+      <ComboBox fx:id="topicComboBox" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
       <Label text="Device token" GridPane.rowIndex="5" />
-      <ComboBox editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="5" />
+      <ComboBox fx:id="deviceTokenComboBox" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="5" />
       <Label text="Collapse ID" GridPane.rowIndex="6" />
-      <TextField maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="6" />
+      <ComboBox fx:id="collapseIdComboBox" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="6" />
       <Label text="Priority" GridPane.columnIndex="2" GridPane.rowIndex="6" />
       <ComboBox fx:id="deliveryPriorityComboBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="6" />
       <Label text="Payload" GridPane.rowIndex="7" />
-      <TextArea prefRowCount="6" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="7">
+      <TextArea fx:id="payloadTextArea" prefRowCount="6" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="7">
          <font>
             <Font name="Monospaced Regular" size="13.0" />
          </font>
