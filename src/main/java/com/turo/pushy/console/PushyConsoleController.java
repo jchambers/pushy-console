@@ -1,19 +1,25 @@
 package com.turo.pushy.console;
 
+import com.turo.pushy.apns.ApnsClient;
 import com.turo.pushy.apns.ApnsPushNotification;
 import com.turo.pushy.apns.PushNotificationResponse;
-import com.turo.pushy.apns.util.SimpleApnsPushNotification;
+import io.netty.util.concurrent.Future;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URL;
-import java.util.Date;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ResourceBundle;
-import java.util.UUID;
 
 public class PushyConsoleController implements Initializable {
 
@@ -44,31 +50,52 @@ public class PushyConsoleController implements Initializable {
 
     @FXML
     protected void handleSendNotificationButtonAction(final ActionEvent event) {
-        this.notificationResultTableView.getItems().add(new SendNotificationResult(new PushNotificationResponse() {
-            @Override
-            public ApnsPushNotification getPushNotification() {
-                return new SimpleApnsPushNotification("Device token", "Topic", "{ A payload in JSON format }");
-            }
+        // TODO Make sure we have all the values we need
+        try {
+            final ApnsClient apnsClient = this.composeNotificationController.buildClient();
 
-            @Override
-            public boolean isAccepted() {
-                return false;
-            }
+            try {
+                final Future<PushNotificationResponse<ApnsPushNotification>> responseFuture =
+                        apnsClient.sendNotification(this.composeNotificationController.buildPushNotification()).await();
 
-            @Override
-            public UUID getApnsId() {
-                return UUID.randomUUID();
+                if (responseFuture.isSuccess()) {
+                    this.notificationResultTableView.getItems().add(new SendNotificationResult(responseFuture.getNow()));
+                } else {
+                    reportPushNotificationError(responseFuture.cause());
+                }
+            } finally {
+                apnsClient.close();
             }
+        } catch (final IOException | InvalidKeyException | NoSuchAlgorithmException | InterruptedException e) {
+            reportPushNotificationError(e);
+        }
+    }
 
-            @Override
-            public String getRejectionReason() {
-                return "Didn't feel like it";
-            }
+    private static void reportPushNotificationError(final Throwable exception) {
+        final Alert alert = new Alert(Alert.AlertType.WARNING);
 
-            @Override
-            public Date getTokenInvalidationTimestamp() {
-                return new Date();
-            }
-        }));
+        // TODO Localize
+        alert.setTitle("Failed to send push notification");
+        alert.setHeaderText(alert.getTitle());
+        alert.setContentText("An exception was thrown while sending a push notification.");
+
+        final String stackTrace;
+        {
+            final StringWriter stringWriter = new StringWriter();
+            final PrintWriter printWriter = new PrintWriter(stringWriter);
+
+            exception.printStackTrace(printWriter);
+
+            stackTrace = stringWriter.toString();
+        }
+
+        final TextArea stackTraceTextArea = new TextArea(stackTrace);
+        stackTraceTextArea.setEditable(false);
+        stackTraceTextArea.setMaxWidth(Double.MAX_VALUE);
+        stackTraceTextArea.setMaxHeight(Double.MAX_VALUE);
+
+        alert.getDialogPane().setExpandableContent(stackTraceTextArea);
+
+        alert.showAndWait();
     }
 }
