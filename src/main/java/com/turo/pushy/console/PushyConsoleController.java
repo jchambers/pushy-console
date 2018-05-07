@@ -51,6 +51,9 @@ public class PushyConsoleController implements Initializable {
     @FXML
     protected void handleSendNotificationButtonAction(final ActionEvent event) {
         // TODO Make sure we have all the values we need
+
+        this.composeNotificationController.saveCurrentFreeformValues();
+
         try {
             final ApnsClient apnsClient = this.composeNotificationController.buildClient();
 

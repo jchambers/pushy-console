@@ -6,10 +6,11 @@ import com.turo.pushy.apns.ApnsPushNotification;
 import com.turo.pushy.apns.DeliveryPriority;
 import com.turo.pushy.apns.auth.ApnsSigningKey;
 import com.turo.pushy.apns.util.SimpleApnsPushNotification;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -20,15 +21,15 @@ import javafx.stage.FileChooser;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ComposeNotificationController implements Initializable {
+public class ComposeNotificationController {
 
     @FXML private ComboBox<String> apnsServerComboBox;
     @FXML private ComboBox<Integer> apnsPortComboBox;
@@ -42,66 +43,100 @@ public class ComposeNotificationController implements Initializable {
     @FXML private ComboBox<String> topicComboBox;
     @FXML private ComboBox<String> deviceTokenComboBox;
     @FXML private ComboBox<String> collapseIdComboBox;
-    @FXML private ComboBox<String> deliveryPriorityComboBox;
+    @FXML private ComboBox<DeliveryPriority> deliveryPriorityComboBox;
     @FXML private TextArea payloadTextArea;
 
     private String certificatePassword;
 
+    private final Preferences preferences;
+
+    private String mostRecentServer;
+    private int mostRecentPort;
+    private DeliveryPriority mostRecentDeliveryPriority;
+    private final List<String> recentKeyIds = new ArrayList<>();
+    private final List<String> recentTeamIds = new ArrayList<>();
+    private final List<String> recentTopics = new ArrayList<>();
+    private final List<String> recentDeviceTokens = new ArrayList<>();
+    private final List<String> recentCollapseIds = new ArrayList<>();
+
+    private static final String MOST_RECENT_SERVER_KEY = "mostRecentServer";
+    private static final String MOST_RECENT_PORT_KEY = "mostRecentPort";
+    private static final String MOST_RECENT_DELIVERY_PRIORITY_KEY = "mostRecentDeliveryPriority";
+    private static final String RECENT_KEY_IDS_KEY = "recentKeyIds";
+    private static final String RECENT_TEAM_IDS_KEY = "recentTeamIds";
+    private static final String RECENT_TOPICS_KEY = "recentTopics";
+    private static final String RECENT_TOKENS_KEY = "recentTokens";
+    private static final String RECENT_COLLAPSE_IDS_KEY = "recentCollapseIds";
+
+    private static final String PREFERENCES_LIST_SEPARATOR = "\n";
+
     private static final Pattern APNS_SIGNING_KEY_WITH_ID_PATTERN =
             Pattern.compile("^APNsAuthKey_([A-Z0-9]{10}).p8$", Pattern.CASE_INSENSITIVE);
 
-    public ApnsClient buildClient() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
-        final ApnsClientBuilder builder = new ApnsClientBuilder();
+    public ComposeNotificationController() {
+        this.preferences = Preferences.userNodeForPackage(getClass());
 
-        builder.setApnsServer(this.apnsServerComboBox.getValue(), this.apnsPortComboBox.getValue());
+        this.mostRecentServer = this.preferences.get(MOST_RECENT_SERVER_KEY, ApnsClientBuilder.PRODUCTION_APNS_HOST);
+        this.mostRecentPort = this.preferences.getInt(MOST_RECENT_PORT_KEY, ApnsClientBuilder.DEFAULT_APNS_PORT);
 
-        if (this.certificatePassword != null) {
-            builder.setClientCredentials(new File(this.apnsCredentialFileTextField.getText()), this.certificatePassword);
-        } else {
-            builder.setSigningKey(ApnsSigningKey.loadFromPkcs8File(new File(this.apnsCredentialFileTextField.getText()),
-                    this.teamIdComboBox.getValue(), this.keyIdComboBox.getValue()));
+        try {
+            this.mostRecentDeliveryPriority = DeliveryPriority.valueOf(
+                    this.preferences.get(MOST_RECENT_DELIVERY_PRIORITY_KEY, DeliveryPriority.IMMEDIATE.name()));
+        } catch (final IllegalArgumentException e) {
+            this.mostRecentDeliveryPriority = DeliveryPriority.IMMEDIATE;
         }
-
-        return builder.build();
     }
 
-    public ApnsPushNotification buildPushNotification() {
-        // TODO Localize
-        final DeliveryPriority deliveryPriority = "Conserve power".equals(deliveryPriorityComboBox.getValue()) ?
-                DeliveryPriority.CONSERVE_POWER : DeliveryPriority.IMMEDIATE;
+    public void initialize() {
+        this.apnsServerComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            this.mostRecentServer = newValue;
+            this.preferences.put(MOST_RECENT_SERVER_KEY, this.mostRecentServer);
+        });
 
-        final String collapseId = collapseIdComboBox.getValue() == null || collapseIdComboBox.getValue().trim().isEmpty() ?
-                null : collapseIdComboBox.getValue();
-
-        return new SimpleApnsPushNotification(
-                this.deviceTokenComboBox.getValue(),
-                this.topicComboBox.getValue(),
-                this.payloadTextArea.getText(),
-                new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1)),
-                deliveryPriority,
-                collapseId);
-    }
-
-    public void initialize(final URL location, final ResourceBundle resources) {
         this.apnsServerComboBox.setItems(FXCollections.observableArrayList(
-                ApnsClientBuilder.DEVELOPMENT_APNS_HOST,
-                ApnsClientBuilder.PRODUCTION_APNS_HOST));
+                ApnsClientBuilder.PRODUCTION_APNS_HOST,
+                ApnsClientBuilder.DEVELOPMENT_APNS_HOST));
 
-        this.apnsServerComboBox.setValue(ApnsClientBuilder.DEVELOPMENT_APNS_HOST);
+        this.apnsServerComboBox.setValue(this.mostRecentServer);
+
+        this.apnsPortComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            this.mostRecentPort = newValue;
+            this.preferences.putInt(MOST_RECENT_PORT_KEY, newValue);
+        });
 
         this.apnsPortComboBox.setItems(FXCollections.observableArrayList(
                 ApnsClientBuilder.DEFAULT_APNS_PORT,
                 ApnsClientBuilder.ALTERNATE_APNS_PORT));
 
-        this.apnsPortComboBox.setValue(ApnsClientBuilder.DEFAULT_APNS_PORT);
+        this.apnsPortComboBox.setValue(this.mostRecentPort);
+
+        this.deliveryPriorityComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            this.mostRecentDeliveryPriority = newValue;
+            this.preferences.put(MOST_RECENT_DELIVERY_PRIORITY_KEY, this.mostRecentDeliveryPriority.name());
+        });
 
         // TODO Localize
         this.deliveryPriorityComboBox.setItems(FXCollections.observableArrayList(
-                "Immediate",
-                "Conserve power"
+                DeliveryPriority.IMMEDIATE,
+                DeliveryPriority.CONSERVE_POWER
         ));
 
-        this.deliveryPriorityComboBox.setValue("Immediate");
+        this.deliveryPriorityComboBox.setValue(this.mostRecentDeliveryPriority);
+
+        this.recentKeyIds.addAll(loadPreferencesList(RECENT_KEY_IDS_KEY));
+        this.keyIdComboBox.setItems(FXCollections.observableArrayList(this.recentKeyIds));
+
+        this.recentTeamIds.addAll(loadPreferencesList(RECENT_TEAM_IDS_KEY));
+        this.teamIdComboBox.setItems(FXCollections.observableArrayList(this.recentTeamIds));
+
+        this.recentTopics.addAll(loadPreferencesList(RECENT_TOPICS_KEY));
+        this.topicComboBox.setItems(FXCollections.observableArrayList(this.recentTopics));
+
+        this.recentDeviceTokens.addAll(loadPreferencesList(RECENT_TOKENS_KEY));
+        this.deviceTokenComboBox.setItems(FXCollections.observableArrayList(this.recentDeviceTokens));
+
+        this.recentCollapseIds.addAll(loadPreferencesList(RECENT_COLLAPSE_IDS_KEY));
+        this.collapseIdComboBox.setItems(FXCollections.observableArrayList(this.recentCollapseIds));
     }
 
     @FXML
@@ -198,5 +233,88 @@ public class ComposeNotificationController implements Initializable {
         }
 
         throw new KeyStoreException("Key store did not contain any private key entries.");
+    }
+
+    void saveCurrentFreeformValues() {
+        if (this.keyIdComboBox.getValue() != null && !this.keyIdComboBox.getValue().trim().isEmpty()) {
+            addToListWithFixedSize(this.keyIdComboBox.getValue(), this.recentKeyIds, 10);
+
+            this.keyIdComboBox.setItems(FXCollections.observableArrayList(this.recentKeyIds));
+            this.savePreferencesList(RECENT_KEY_IDS_KEY, this.recentKeyIds);
+        }
+
+        if (this.teamIdComboBox.getValue() != null && !this.teamIdComboBox.getValue().trim().isEmpty()) {
+            addToListWithFixedSize(this.teamIdComboBox.getValue(), this.recentTeamIds, 10);
+
+            this.teamIdComboBox.setItems(FXCollections.observableArrayList(this.recentTeamIds));
+            this.savePreferencesList(RECENT_TEAM_IDS_KEY, this.recentTeamIds);
+        }
+
+        addToListWithFixedSize(this.topicComboBox.getValue(), this.recentTopics, 10);
+
+        this.topicComboBox.setItems(FXCollections.observableArrayList(this.recentTopics));
+        this.savePreferencesList(RECENT_TOPICS_KEY, this.recentTopics);
+
+        addToListWithFixedSize(this.deviceTokenComboBox.getValue(), this.recentDeviceTokens, 10);
+
+        this.deviceTokenComboBox.setItems(FXCollections.observableArrayList(this.recentDeviceTokens));
+        this.savePreferencesList(RECENT_TOKENS_KEY, this.recentDeviceTokens);
+
+        if (this.collapseIdComboBox.getValue() != null && !this.collapseIdComboBox.getValue().trim().isEmpty()) {
+            addToListWithFixedSize(this.collapseIdComboBox.getValue(), this.recentCollapseIds, 10);
+
+            this.collapseIdComboBox.setItems(FXCollections.observableArrayList(this.recentCollapseIds));
+            this.savePreferencesList(RECENT_COLLAPSE_IDS_KEY, this.recentCollapseIds);
+        }
+    }
+
+    private void savePreferencesList(final String key, final List<String> values) {
+        this.preferences.put(key, String.join(PREFERENCES_LIST_SEPARATOR, values));
+    }
+
+    private List<String> loadPreferencesList(final String key) {
+        return Arrays.asList(this.preferences.get(key, "").split(PREFERENCES_LIST_SEPARATOR));
+    }
+
+    private static void addToListWithFixedSize(final String string, final List<String> list, final int maxSize) {
+        // Move the new element to the front of the list even if it's already in there at another index.
+        list.remove(string);
+        list.add(0, string);
+
+        while (list.size() > maxSize) {
+            list.remove(list.size() - 1);
+        }
+    }
+
+    ApnsClient buildClient() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
+        final ApnsClientBuilder builder = new ApnsClientBuilder();
+
+        builder.setApnsServer(this.apnsServerComboBox.getValue(), this.apnsPortComboBox.getValue());
+
+        if (this.certificatePassword != null) {
+            builder.setClientCredentials(new File(this.apnsCredentialFileTextField.getText()), this.certificatePassword);
+        } else {
+            builder.setSigningKey(ApnsSigningKey.loadFromPkcs8File(new File(this.apnsCredentialFileTextField.getText()),
+                    this.teamIdComboBox.getValue(), this.keyIdComboBox.getValue()));
+        }
+
+        return builder.build();
+    }
+
+    ApnsPushNotification buildPushNotification() {
+        // TODO Localize
+        final DeliveryPriority deliveryPriority = "Conserve power".equals(deliveryPriorityComboBox.getValue()) ?
+                DeliveryPriority.CONSERVE_POWER : DeliveryPriority.IMMEDIATE;
+
+        final String collapseId = collapseIdComboBox.getValue() == null || collapseIdComboBox.getValue().trim().isEmpty() ?
+                null : collapseIdComboBox.getValue();
+
+        return new SimpleApnsPushNotification(
+                this.deviceTokenComboBox.getValue(),
+                this.topicComboBox.getValue(),
+                this.payloadTextArea.getText(),
+                new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1)),
+                deliveryPriority,
+                collapseId);
     }
 }
