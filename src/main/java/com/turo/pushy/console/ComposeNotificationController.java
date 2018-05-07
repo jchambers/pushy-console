@@ -6,8 +6,6 @@ import com.turo.pushy.apns.ApnsPushNotification;
 import com.turo.pushy.apns.DeliveryPriority;
 import com.turo.pushy.apns.auth.ApnsSigningKey;
 import com.turo.pushy.apns.util.SimpleApnsPushNotification;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -22,7 +20,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.*;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.*;
@@ -114,18 +111,19 @@ public class ComposeNotificationController {
 
         this.apnsPortComboBox.setValue(this.mostRecentPort);
 
+        this.deliveryPriorityComboBox.setValue(this.mostRecentDeliveryPriority);
+        this.deliveryPriorityComboBox.setCellFactory(listView -> new DeliveryPriorityListCell());
+        this.deliveryPriorityComboBox.setButtonCell(new DeliveryPriorityListCell());
+
         this.deliveryPriorityComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             this.mostRecentDeliveryPriority = newValue;
             this.preferences.put(MOST_RECENT_DELIVERY_PRIORITY_KEY, this.mostRecentDeliveryPriority.name());
         });
 
-        // TODO Localize
         this.deliveryPriorityComboBox.setItems(FXCollections.observableArrayList(
                 DeliveryPriority.IMMEDIATE,
                 DeliveryPriority.CONSERVE_POWER
         ));
-
-        this.deliveryPriorityComboBox.setValue(this.mostRecentDeliveryPriority);
 
         this.recentKeyIds.addAll(loadPreferencesList(RECENT_KEY_IDS_KEY));
         this.keyIdComboBox.setItems(FXCollections.observableArrayList(this.recentKeyIds));
@@ -345,10 +343,6 @@ public class ComposeNotificationController {
     }
 
     ApnsPushNotification buildPushNotification() {
-        // TODO Localize
-        final DeliveryPriority deliveryPriority = "Conserve power".equals(deliveryPriorityComboBox.getValue()) ?
-                DeliveryPriority.CONSERVE_POWER : DeliveryPriority.IMMEDIATE;
-
         final String collapseId = collapseIdComboBox.getValue() == null || collapseIdComboBox.getValue().trim().isEmpty() ?
                 null : collapseIdComboBox.getValue();
 
@@ -357,7 +351,7 @@ public class ComposeNotificationController {
                 this.topicComboBox.getValue(),
                 this.payloadTextArea.getText(),
                 new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1)),
-                deliveryPriority,
+                this.deliveryPriorityComboBox.getValue(),
                 collapseId);
     }
 }
