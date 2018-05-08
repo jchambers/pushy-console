@@ -12,7 +12,7 @@
       <fx:include fx:id="composeNotification" source="compose-notification.fxml" />
       <AnchorPane VBox.vgrow="NEVER">
          <children>
-            <Button defaultButton="true" layoutX="527.0" layoutY="87.0" mnemonicParsing="false" onAction="#handleSendNotificationButtonAction" text="%send.label" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            <Button defaultButton="true" layoutX="527.0" layoutY="87.0" mnemonicParsing="false" onAction="#handleSendNotificationButtonAction" text="%fxml.send.label" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
          </children>
          <padding>
             <Insets right="10.0" />
@@ -20,18 +20,18 @@
       </AnchorPane>
       <TableView fx:id="notificationResultTableView" prefHeight="200.0" prefWidth="200.0" tableMenuButtonVisible="true" VBox.vgrow="ALWAYS">
         <columns>
-          <TableColumn prefWidth="-1.0" text="%notification.label">
+          <TableColumn prefWidth="-1.0" text="%fxml.notification.label">
                <columns>
-                  <TableColumn fx:id="notificationResultTopicColumn" editable="false" prefWidth="100.0" sortable="false" text="%topic.label" />
-                  <TableColumn fx:id="notificationResultTokenColumn" editable="false" prefWidth="100.0" sortable="false" text="%token.label" />
-                  <TableColumn fx:id="notificationResultPayloadColumn" editable="false" prefWidth="100.0" sortable="false" text="%payload.label" />
-                  <TableColumn fx:id="notificationResultPriorityColumn" editable="false" prefWidth="100.0" sortable="false" text="%priority.label" />
+                  <TableColumn fx:id="notificationResultTopicColumn" editable="false" prefWidth="100.0" sortable="false" text="%fxml.topic.label" />
+                  <TableColumn fx:id="notificationResultTokenColumn" editable="false" prefWidth="100.0" sortable="false" text="%fxml.token.label" />
+                  <TableColumn fx:id="notificationResultPayloadColumn" editable="false" prefWidth="100.0" sortable="false" text="%fxml.payload.label" />
+                  <TableColumn fx:id="notificationResultPriorityColumn" editable="false" prefWidth="100.0" sortable="false" text="%fxml.priority.label" />
                </columns></TableColumn>
-          <TableColumn prefWidth="-1.0" text="%response.label">
+          <TableColumn prefWidth="-1.0" text="%fxml.response.label">
                <columns>
-                  <TableColumn fx:id="notificationResultStatusColumn" editable="false" prefWidth="100.0" sortable="false" text="%status.label" />
-                  <TableColumn fx:id="notificationResultDetailsColumn" editable="false" prefWidth="100.0" sortable="false" text="%details.label" />
-                  <TableColumn fx:id="notificationResultApnsIdColumn" editable="false" prefWidth="300.0" sortable="false" text="%apns-id.label" />
+                  <TableColumn fx:id="notificationResultStatusColumn" editable="false" prefWidth="100.0" sortable="false" text="%fxml.status.label" />
+                  <TableColumn fx:id="notificationResultDetailsColumn" editable="false" prefWidth="100.0" sortable="false" text="%fxml.details.label" />
+                  <TableColumn fx:id="notificationResultApnsIdColumn" editable="false" prefWidth="300.0" sortable="false" text="%fxml.apns-id.label" />
                </columns></TableColumn>
         </columns>
       </TableView>
