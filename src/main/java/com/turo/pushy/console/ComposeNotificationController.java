@@ -372,6 +372,29 @@ public class ComposeNotificationController {
         }
     }
 
+    boolean hasRequiredFields() {
+        final boolean hasCredentials;
+
+        if (this.apnsCredentialFileTextField.getText() != null && !this.apnsCredentialFileTextField.getText().trim().isEmpty()) {
+            if (this.certificatePassword != null) {
+                hasCredentials = true;
+            } else {
+                final boolean hasKeyId = this.keyIdComboBox.getValue() != null && !this.keyIdComboBox.getValue().trim().isEmpty();
+                final boolean hasTeamId = this.teamIdComboBox.getValue() != null && !this.teamIdComboBox.getValue().trim().isEmpty();
+
+                hasCredentials = hasKeyId && hasTeamId;
+            }
+        } else {
+            hasCredentials = false;
+        }
+
+        final boolean hasTopic = this.topicComboBox.getValue() != null && !this.topicComboBox.getValue().trim().isEmpty();
+        final boolean hasToken = this.deviceTokenComboBox.getValue() != null && !this.deviceTokenComboBox.getValue().trim().isEmpty();
+        final boolean hasPayload = this.payloadTextArea.getText() != null && !this.payloadTextArea.getText().trim().isEmpty();
+
+        return hasCredentials && hasTopic && hasToken && hasPayload;
+    }
+
     ApnsClient buildClient() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
         final ApnsClientBuilder builder = new ApnsClientBuilder();
 

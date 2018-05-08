@@ -12,6 +12,9 @@ class PushyConsoleResources {
     private static final String BASE_NAME = "com/turo/pushy/console/pushy-console";
     private static final Utf8ResourceBundleControl UTF_8_RESOURCE_BUNDLE_CONTROL = new Utf8ResourceBundleControl();
 
+    public static final String HIGHLIGHT_EMPTY_FIELDS_STYLESHEET =
+            PushyConsoleResources.class.getResource("highlight-empty-fields.css").toExternalForm();
+
     // Based heavily upon https://softwarei18n.org/using-unicode-in-java-resource-bundles-6220776b6099.
     private static class Utf8ResourceBundleControl extends ResourceBundle.Control {
         public ResourceBundle newBundle(final String baseName, final Locale locale, final String format, final ClassLoader loader, final boolean reload)
@@ -47,7 +50,7 @@ class PushyConsoleResources {
         }
     }
 
-    public static ResourceBundle getResourceBundle() {
+    static ResourceBundle getResourceBundle() {
         return ResourceBundle.getBundle(BASE_NAME, UTF_8_RESOURCE_BUNDLE_CONTROL);
     }
 }
