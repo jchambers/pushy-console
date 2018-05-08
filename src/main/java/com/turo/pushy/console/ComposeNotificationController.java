@@ -1,5 +1,6 @@
 package com.turo.pushy.console;
 
+import com.sun.javafx.scene.control.skin.resources.ControlResources;
 import com.turo.pushy.apns.ApnsClient;
 import com.turo.pushy.apns.ApnsClientBuilder;
 import com.turo.pushy.apns.ApnsPushNotification;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
@@ -29,6 +31,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ComposeNotificationController {
+
+    @FXML private ResourceBundle resources;
 
     @FXML private ComboBox<String> apnsServerComboBox;
     @FXML private ComboBox<Integer> apnsPortComboBox;
@@ -183,14 +187,22 @@ public class ComposeNotificationController {
                 }
             } catch (final NoSuchAlgorithmException | IOException | InvalidKeyException e) {
                 // Couldn't load the given file as a signing key. Try it as a P12 certificate instead.
-                final Optional<String> verifiedPassword = new PasswordInputDialog(password -> {
+                final PasswordInputDialog passwordInputDialog = new PasswordInputDialog(password -> {
                     try {
                         getFirstPrivateKeyEntry(file, password);
                         return true;
                     } catch (final KeyStoreException | IOException e1) {
                         return false;
                     }
-                }).showAndWait();
+                });
+
+                final MessageFormat headerFormat = new MessageFormat(resources.getString("certificate-password-dialog.header"));
+
+                passwordInputDialog.setTitle(resources.getString("certificate-password-dialog.title"));
+                passwordInputDialog.setHeaderText(headerFormat.format(new String[] { file.getName() }));
+                passwordInputDialog.setContentText(resources.getString("certificate-password-dialog.prompt"));
+
+                final Optional<String> verifiedPassword = passwordInputDialog.showAndWait();
 
                 verifiedPassword.ifPresent(password -> {
                     this.certificatePassword = password;

@@ -31,35 +31,35 @@
       <RowConstraints minHeight="10.0" valignment="TOP" />
   </rowConstraints>
    <children>
-      <Label text="APNs server" />
+      <Label text="%apns-server.label" />
       <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647">
          <children>
             <ComboBox fx:id="apnsServerComboBox" maxWidth="1.7976931348623157E308" prefWidth="270.0" GridPane.columnIndex="1" HBox.hgrow="ALWAYS" />
-            <Label maxWidth="-Infinity" minWidth="-Infinity" text="Port" HBox.hgrow="NEVER" />
+            <Label maxWidth="-Infinity" minWidth="-Infinity" text="%port.label" HBox.hgrow="NEVER" />
             <ComboBox fx:id="apnsPortComboBox" minWidth="-Infinity" prefWidth="80.0" HBox.hgrow="NEVER" />
          </children>
       </HBox>
-      <Label text="Credentials" GridPane.rowIndex="1" />
+      <Label text="%credentials.label" GridPane.rowIndex="1" />
       <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="1">
          <children>
             <TextField fx:id="apnsCredentialFileTextField" editable="false" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" HBox.hgrow="ALWAYS" />
-            <Button maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleBrowseButtonAction" text="Browse…" HBox.hgrow="NEVER" />
+            <Button maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleBrowseButtonAction" text="%browse.label" HBox.hgrow="NEVER" />
          </children>
       </HBox>
-      <Label fx:id="keyIdLabel" disable="true" text="Key ID" GridPane.rowIndex="2" />
+      <Label fx:id="keyIdLabel" disable="true" text="%key-id.label" GridPane.rowIndex="2" />
       <ComboBox fx:id="keyIdComboBox" disable="true" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
-      <Label fx:id="teamIdLabel" disable="true" text="Team ID" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+      <Label fx:id="teamIdLabel" disable="true" text="%team-id.label" GridPane.columnIndex="2" GridPane.rowIndex="2" />
       <ComboBox fx:id="teamIdComboBox" disable="true" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
       <Separator prefWidth="200.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="3" />
-      <Label text="Topic" GridPane.rowIndex="4" />
+      <Label text="%topic.label" GridPane.rowIndex="4" />
       <ComboBox fx:id="topicComboBox" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
-      <Label text="Device token" GridPane.rowIndex="5" />
+      <Label text="%token.label" GridPane.rowIndex="5" />
       <ComboBox fx:id="deviceTokenComboBox" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="5" />
-      <Label text="Collapse ID" GridPane.rowIndex="6" />
+      <Label text="%collapse-id.label" GridPane.rowIndex="6" />
       <ComboBox fx:id="collapseIdComboBox" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="6" />
-      <Label text="Priority" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+      <Label text="%priority.label" GridPane.columnIndex="2" GridPane.rowIndex="6" />
       <ComboBox fx:id="deliveryPriorityComboBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="6" />
-      <Label text="Payload" GridPane.rowIndex="7" />
+      <Label text="%payload.label" GridPane.rowIndex="7" />
       <TextArea fx:id="payloadTextArea" prefRowCount="6" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="7">
          <font>
             <Font name="Monospaced Regular" size="13.0" />
