@@ -7,13 +7,11 @@ import com.turo.pushy.apns.DeliveryPriority;
 import com.turo.pushy.apns.auth.ApnsSigningKey;
 import com.turo.pushy.apns.util.SimpleApnsPushNotification;
 import javafx.collections.FXCollections;
+import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 
 import java.io.File;
@@ -76,6 +74,8 @@ public class ComposeNotificationController {
             Pattern.compile("^APNsAuthKey_([A-Z0-9]{10}).p8$", Pattern.CASE_INSENSITIVE);
 
     private static final Pattern CERTIFICATE_TOPIC_PATTERN = Pattern.compile(".*UID=([^,]+).*");
+
+    private static final PseudoClass EMPTY_PSEUDO_CLASS = PseudoClass.getPseudoClass("empty");
 
     public ComposeNotificationController() {
         this.preferences = Preferences.userNodeForPackage(getClass());
@@ -142,6 +142,40 @@ public class ComposeNotificationController {
 
         this.recentCollapseIds.addAll(loadPreferencesList(RECENT_COLLAPSE_IDS_KEY));
         this.collapseIdComboBox.setItems(FXCollections.observableArrayList(this.recentCollapseIds));
+
+        addEmptyPseudoClassListener(this.keyIdComboBox, this.teamIdComboBox, this.topicComboBox, this.deviceTokenComboBox);
+        addEmptyPseudoClassListener(this.apnsCredentialFileTextField, this.payloadTextArea);
+    }
+
+    @SafeVarargs
+    private static void addEmptyPseudoClassListener(final ComboBox<String>... comboBoxes) {
+        for (final ComboBox<String> comboBox : comboBoxes) {
+            comboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+                final boolean oldValueBlank = (oldValue == null || oldValue.trim().isEmpty());
+                final boolean newValueBlank = (newValue == null || newValue.trim().isEmpty());
+
+                if (oldValueBlank != newValueBlank) {
+                    comboBox.pseudoClassStateChanged(EMPTY_PSEUDO_CLASS, newValueBlank);
+                }
+            });
+
+            comboBox.pseudoClassStateChanged(EMPTY_PSEUDO_CLASS, comboBox.getValue() == null || comboBox.getValue().trim().isEmpty());
+        }
+    }
+
+    private static void addEmptyPseudoClassListener(final TextInputControl... textInputControls) {
+        for (final TextInputControl textInputControl : textInputControls) {
+            textInputControl.textProperty().addListener((observable, oldValue, newValue) -> {
+                final boolean oldValueBlank = (oldValue == null || oldValue.trim().isEmpty());
+                final boolean newValueBlank = (newValue == null || newValue.trim().isEmpty());
+
+                if (oldValueBlank != newValueBlank) {
+                    textInputControl.pseudoClassStateChanged(EMPTY_PSEUDO_CLASS, newValueBlank);
+                }
+            });
+
+            textInputControl.pseudoClassStateChanged(EMPTY_PSEUDO_CLASS, textInputControl.getText() == null || textInputControl.getText().trim().isEmpty());
+        }
     }
 
     @FXML
