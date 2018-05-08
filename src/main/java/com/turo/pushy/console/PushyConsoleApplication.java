@@ -6,8 +6,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.InputStream;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class PushyConsoleApplication extends Application {
