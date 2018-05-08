@@ -8,6 +8,8 @@ import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -88,34 +90,40 @@ public class PushyConsoleController {
 
     @FXML
     protected void handleSendNotificationButtonAction(final ActionEvent event) {
-        // TODO Make sure we have all the values we need
+        final Scene scene = ((Node) event.getSource()).getScene();
 
-        this.composeNotificationController.saveCurrentFreeformValues();
+        if (this.composeNotificationController.hasRequiredFields()) {
+            scene.getStylesheets().remove(PushyConsoleResources.HIGHLIGHT_EMPTY_FIELDS_STYLESHEET);
 
-        final Task<PushNotificationResponse<ApnsPushNotification>> sendNotificationTask = new Task<PushNotificationResponse<ApnsPushNotification>>() {
+            this.composeNotificationController.saveCurrentFreeformValues();
 
-            @Override
-            protected PushNotificationResponse<ApnsPushNotification> call() throws Exception {
-                final ApnsClient apnsClient = PushyConsoleController.this.composeNotificationController.buildClient();
+            final Task<PushNotificationResponse<ApnsPushNotification>> sendNotificationTask = new Task<PushNotificationResponse<ApnsPushNotification>>() {
 
-                try {
-                    return apnsClient.sendNotification(
-                            PushyConsoleController.this.composeNotificationController.buildPushNotification()).get();
-                } finally {
-                    apnsClient.close();
+                @Override
+                protected PushNotificationResponse<ApnsPushNotification> call() throws Exception {
+                    final ApnsClient apnsClient = PushyConsoleController.this.composeNotificationController.buildClient();
+
+                    try {
+                        return apnsClient.sendNotification(
+                                PushyConsoleController.this.composeNotificationController.buildPushNotification()).get();
+                    } finally {
+                        apnsClient.close();
+                    }
                 }
-            }
-        };
+            };
 
-        sendNotificationTask.setOnSucceeded(workerStateEvent -> {
-            this.notificationResultTableView.getItems().add(sendNotificationTask.getValue());
-        });
+            sendNotificationTask.setOnSucceeded(workerStateEvent -> {
+                this.notificationResultTableView.getItems().add(sendNotificationTask.getValue());
+            });
 
-        sendNotificationTask.setOnFailed(workerStateEvent -> {
-            reportPushNotificationError(sendNotificationTask.getException());
-        });
+            sendNotificationTask.setOnFailed(workerStateEvent -> {
+                reportPushNotificationError(sendNotificationTask.getException());
+            });
 
-        this.sendNotificationExecutorService.execute(sendNotificationTask);
+            this.sendNotificationExecutorService.execute(sendNotificationTask);
+        } else {
+            scene.getStylesheets().add(PushyConsoleResources.HIGHLIGHT_EMPTY_FIELDS_STYLESHEET);
+        }
     }
 
     private void reportPushNotificationError(final Throwable exception) {

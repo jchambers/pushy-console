@@ -1,0 +1,17 @@
+.text-field:empty, .text-area:empty {
+    -fx-text-box-border: #DF4A32;
+}
+
+.text-field:empty:focused, .text-area:empty:focused {
+    -fx-text-box-border: inherit;
+}
+
+.combo-box-base:empty {
+    -fx-border-color: #DF4A32;
+    -fx-border-radius: 4;
+}
+
+.combo-box-base:empty:disabled, .combo-box-base:empty:focused {
+    -fx-border-color: inherit;
+    -fx-border-radius: inherit;
+}
