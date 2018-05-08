@@ -9,12 +9,13 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
+import java.util.ResourceBundle;
 import java.util.function.Function;
 
 /**
  * A simple password input dialog. Shamelessly borrowed from TextInputField.
  */
-public class PasswordInputDialog extends Dialog<String> {
+class PasswordInputDialog extends Dialog<String> {
     private final GridPane grid;
 
     private final Label label;
@@ -22,15 +23,10 @@ public class PasswordInputDialog extends Dialog<String> {
 
     private final Label incorrectPasswordLabel;
 
-    public PasswordInputDialog() {
-        this((password) -> true);
-    }
-
-    public PasswordInputDialog(final Function<String, Boolean> passwordVerificationFunction) {
+    PasswordInputDialog(final Function<String, Boolean> passwordVerificationFunction) {
         final DialogPane dialogPane = getDialogPane();
         dialogPane.contentTextProperty().addListener(o -> updateGrid());
 
-        // TODO Localize
         setTitle(ControlResources.getString("Dialog.confirm.title"));
         dialogPane.setHeaderText(ControlResources.getString("Dialog.confirm.header"));
         dialogPane.getStyleClass().add("text-input-dialog");
@@ -44,12 +40,13 @@ public class PasswordInputDialog extends Dialog<String> {
         this.label = createLabel(dialogPane.getContentText());
         this.label.textProperty().bind(dialogPane.contentTextProperty());
 
-        // TODO Localize
-        this.incorrectPasswordLabel = createLabel("The password you entered is incorrect. Please try again.");
+        this.incorrectPasswordLabel = createLabel(PushyConsoleResources.getResourceBundle().getString("password-dialog.incorrect-password"));
         this.incorrectPasswordLabel.setVisible(false);
+        this.incorrectPasswordLabel.textProperty().addListener(o -> updateGrid());
 
         this.grid = new GridPane();
         this.grid.setHgap(10);
+        this.grid.setVgap(8);
         this.grid.setMaxWidth(Double.MAX_VALUE);
         this.grid.setAlignment(Pos.CENTER_LEFT);
 

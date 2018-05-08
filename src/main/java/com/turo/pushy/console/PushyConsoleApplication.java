@@ -6,6 +6,10 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.io.InputStream;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 public class PushyConsoleApplication extends Application {
 
     public static void main(final String... args) {
@@ -13,10 +17,12 @@ public class PushyConsoleApplication extends Application {
     }
 
     public void start(final Stage primaryStage) throws Exception {
-        final Parent root = FXMLLoader.load(getClass().getResource("main.fxml"));
+        final ResourceBundle resourceBundle = PushyConsoleResources.getResourceBundle();
 
-        // TODO Localize
-        primaryStage.setTitle("Pushy Console");
+        final Parent root = FXMLLoader.load(getClass().getResource("main.fxml"),
+                resourceBundle);
+
+        primaryStage.setTitle(resourceBundle.getString("pushy-console.title"));
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }

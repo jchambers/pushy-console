@@ -4,6 +4,7 @@ import com.turo.pushy.apns.ApnsClient;
 import com.turo.pushy.apns.ApnsPushNotification;
 import com.turo.pushy.apns.PushNotificationResponse;
 import io.netty.util.concurrent.Future;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -12,6 +13,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.util.Callback;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -22,6 +24,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ResourceBundle;
 
 public class PushyConsoleController implements Initializable {
+
+    @FXML private ResourceBundle resources;
 
     @FXML private ComposeNotificationController composeNotificationController;
 
@@ -74,13 +78,12 @@ public class PushyConsoleController implements Initializable {
         }
     }
 
-    private static void reportPushNotificationError(final Throwable exception) {
+    private void reportPushNotificationError(final Throwable exception) {
         final Alert alert = new Alert(Alert.AlertType.WARNING);
 
-        // TODO Localize
-        alert.setTitle("Failed to send push notification");
-        alert.setHeaderText(alert.getTitle());
-        alert.setContentText("An exception was thrown while sending a push notification.");
+        alert.setTitle(this.resources.getString("alert.notification-failed.title"));
+        alert.setHeaderText(this.resources.getString("alert.notification-failed.header"));
+        alert.setContentText(exception.getLocalizedMessage());
 
         final String stackTrace;
         {
