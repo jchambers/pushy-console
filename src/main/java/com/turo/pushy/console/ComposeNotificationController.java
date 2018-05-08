@@ -1,6 +1,5 @@
 package com.turo.pushy.console;
 
-import com.sun.javafx.scene.control.skin.resources.ControlResources;
 import com.turo.pushy.apns.ApnsClient;
 import com.turo.pushy.apns.ApnsClientBuilder;
 import com.turo.pushy.apns.ApnsPushNotification;
