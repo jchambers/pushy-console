@@ -4,8 +4,8 @@ import com.turo.pushy.apns.ApnsClient;
 import com.turo.pushy.apns.ApnsPushNotification;
 import com.turo.pushy.apns.DeliveryPriority;
 import com.turo.pushy.apns.PushNotificationResponse;
-import io.netty.util.concurrent.Future;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -13,13 +13,12 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class PushyConsoleController {
 
@@ -37,6 +36,8 @@ public class PushyConsoleController {
     @FXML private TableColumn<PushNotificationResponse<ApnsPushNotification>, String> notificationResultStatusColumn;
     @FXML private TableColumn<PushNotificationResponse<ApnsPushNotification>, String> notificationResultDetailsColumn;
     @FXML private TableColumn<PushNotificationResponse<ApnsPushNotification>, String> notificationResultApnsIdColumn;
+
+    private final ExecutorService sendNotificationExecutorService = Executors.newSingleThreadExecutor();
 
     public void initialize() {
         notificationResultTopicColumn.setCellValueFactory(cellDataFeatures ->
@@ -91,24 +92,30 @@ public class PushyConsoleController {
 
         this.composeNotificationController.saveCurrentFreeformValues();
 
-        try {
-            final ApnsClient apnsClient = this.composeNotificationController.buildClient();
+        final Task<PushNotificationResponse<ApnsPushNotification>> sendNotificationTask = new Task<PushNotificationResponse<ApnsPushNotification>>() {
 
-            try {
-                final Future<PushNotificationResponse<ApnsPushNotification>> responseFuture =
-                        apnsClient.sendNotification(this.composeNotificationController.buildPushNotification()).await();
+            @Override
+            protected PushNotificationResponse<ApnsPushNotification> call() throws Exception {
+                final ApnsClient apnsClient = PushyConsoleController.this.composeNotificationController.buildClient();
 
-                if (responseFuture.isSuccess()) {
-                    this.notificationResultTableView.getItems().add(responseFuture.getNow());
-                } else {
-                    reportPushNotificationError(responseFuture.cause());
+                try {
+                    return apnsClient.sendNotification(
+                            PushyConsoleController.this.composeNotificationController.buildPushNotification()).get();
+                } finally {
+                    apnsClient.close();
                 }
-            } finally {
-                apnsClient.close();
             }
-        } catch (final IOException | InvalidKeyException | NoSuchAlgorithmException | InterruptedException e) {
-            reportPushNotificationError(e);
-        }
+        };
+
+        sendNotificationTask.setOnSucceeded(workerStateEvent -> {
+            this.notificationResultTableView.getItems().add(sendNotificationTask.getValue());
+        });
+
+        sendNotificationTask.setOnFailed(workerStateEvent -> {
+            reportPushNotificationError(sendNotificationTask.getException());
+        });
+
+        this.sendNotificationExecutorService.execute(sendNotificationTask);
     }
 
     private void reportPushNotificationError(final Throwable exception) {
