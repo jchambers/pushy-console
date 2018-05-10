@@ -27,6 +27,12 @@ import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * A controller for the area of the area of the main window where users enter connection settings and notification
+ * details.
+ *
+ * @author <a href="https://github.com/jchambers/">Jon Chambers</a>
+ */
 public class ComposeNotificationController {
 
     @FXML private ResourceBundle resources;
@@ -264,22 +270,27 @@ public class ComposeNotificationController {
 
                         if (topicMatcher.matches()) {
                             baseTopicFromCertificate = topicMatcher.group(1);
+
+                            this.topicComboBox.setItems(FXCollections.observableArrayList(
+                                    baseTopicFromCertificate,
+                                    baseTopicFromCertificate + ".voip",
+                                    baseTopicFromCertificate + ".complication"));
+
+                            this.topicComboBox.setValue(this.topicComboBox.getItems().contains(currentTopic) ?
+                                    currentTopic : this.topicComboBox.getItems().get(0));
                         } else {
-                            // TODO Show an alert instead
-                            throw new RuntimeException(e);
+                            final Alert alert = new Alert(Alert.AlertType.WARNING);
+
+                            alert.setTitle(this.resources.getString("alert.bad-certificate.title"));
+                            alert.setHeaderText(this.resources.getString("alert.bad-certificate.header"));
+                            alert.setContentText(this.resources.getString("alert.bad-certificate.content-text"));
+
+                            alert.show();
                         }
                     } catch (final KeyStoreException | IOException e1) {
                         // This should never happen because we already loaded the certificate to check the password.
                         throw new RuntimeException(e);
                     }
-
-                    this.topicComboBox.setItems(FXCollections.observableArrayList(
-                            baseTopicFromCertificate,
-                            baseTopicFromCertificate + ".voip",
-                            baseTopicFromCertificate + ".complication"));
-
-                    this.topicComboBox.setValue(this.topicComboBox.getItems().contains(currentTopic) ?
-                            currentTopic : this.topicComboBox.getItems().get(0));
                 });
             }
         }
