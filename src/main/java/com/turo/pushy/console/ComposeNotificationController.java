@@ -14,6 +14,7 @@ import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -35,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * A controller for the area of the area of the main window where users enter connection settings and notification
@@ -59,11 +61,13 @@ public class ComposeNotificationController {
     @FXML private ComboBox<String> deviceTokenComboBox;
     @FXML private ComboBox<String> collapseIdComboBox;
     @FXML private ComboBox<DeliveryPriority> deliveryPriorityComboBox;
+    @FXML private MenuButton recentPayloadsMenuButton;
     @FXML private TextArea payloadTextArea;
 
     private String certificatePassword;
 
     private final ListProperty<String> recentTopicsProperty = new SimpleListProperty<>();
+    private final ObservableList<String> recentPayloads = FXCollections.observableArrayList();
 
     private static final String MOST_RECENT_SERVER_KEY = "mostRecentServer";
     private static final String MOST_RECENT_PORT_KEY = "mostRecentPort";
@@ -73,6 +77,7 @@ public class ComposeNotificationController {
     private static final String RECENT_TOPICS_KEY = "recentTopics";
     private static final String RECENT_TOKENS_KEY = "recentTokens";
     private static final String RECENT_COLLAPSE_IDS_KEY = "recentCollapseIds";
+    private static final String RECENT_PAYLOADS_KEY = "recentPayloads";
 
     private static final Gson GSON = new Gson();
     private static final Type STRING_LIST_TYPE = new TypeToken<List<String>>() {}.getType();
@@ -134,6 +139,36 @@ public class ComposeNotificationController {
         this.collapseIdComboBox.setItems(FXCollections.observableArrayList(loadPreferencesList(RECENT_COLLAPSE_IDS_KEY)));
         this.collapseIdComboBox.getItems().addListener((ListChangeListener<String>) change ->
                 savePreferencesList(RECENT_COLLAPSE_IDS_KEY, change.getList()));
+
+        this.recentPayloads.addListener((ListChangeListener<String>) change -> {
+            this.recentPayloadsMenuButton.getItems().clear();
+
+            this.recentPayloadsMenuButton.getItems().addAll(change.getList().stream().map(payload -> {
+                final String smooshedPayload = payload.replaceAll("\\s+", " ");
+                final MenuItem menuItem = new MenuItem(smooshedPayload);
+
+                menuItem.setOnAction(event -> this.payloadTextArea.setText(this.payloadTextArea.getText() + payload));
+
+                return menuItem;
+            }).collect(Collectors.toList()));
+
+            this.recentPayloadsMenuButton.setDisable(change.getList().isEmpty());
+        });
+
+        this.recentPayloads.addAll(loadPreferencesList(RECENT_PAYLOADS_KEY));
+
+        this.recentPayloads.addListener((ListChangeListener<String>) change -> {
+            int end = this.recentPayloads.size();
+
+            while (end > 0) {
+                try {
+                    preferences.put(RECENT_PAYLOADS_KEY, GSON.toJson(this.recentPayloads.subList(0, end)));
+                    break;
+                } catch (final IllegalArgumentException e) {
+                    end -= 1;
+                }
+            }
+        });
 
         addEmptyPseudoClassListener(this.keyIdComboBox, this.teamIdComboBox, this.topicComboBox, this.deviceTokenComboBox);
         addEmptyPseudoClassListener(this.apnsCredentialFileTextField, this.payloadTextArea);
@@ -300,6 +335,11 @@ public class ComposeNotificationController {
         if (StringUtils.isNotBlank(this.collapseIdComboBox.getValue())) {
             addCurrentValueToComboBoxItems(this.collapseIdComboBox);
         }
+
+        final String payload = this.payloadTextArea.getText();
+
+        this.recentPayloads.remove(payload);
+        this.recentPayloads.add(0, payload);
     }
 
     private void savePreferencesList(final String key, final List<?> values) {
