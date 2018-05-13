@@ -7,7 +7,10 @@ import com.turo.pushy.apns.DeliveryPriority;
 import com.turo.pushy.apns.auth.ApnsSigningKey;
 import com.turo.pushy.apns.util.SimpleApnsPushNotification;
 import com.turo.pushy.console.util.CertificateUtil;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -56,16 +59,7 @@ public class ComposeNotificationController {
 
     private String certificatePassword;
 
-    private final Preferences preferences;
-
-    private String mostRecentServer;
-    private int mostRecentPort;
-    private DeliveryPriority mostRecentDeliveryPriority;
-    private final List<String> recentKeyIds = new ArrayList<>();
-    private final List<String> recentTeamIds = new ArrayList<>();
-    private final List<String> recentTopics = new ArrayList<>();
-    private final List<String> recentDeviceTokens = new ArrayList<>();
-    private final List<String> recentCollapseIds = new ArrayList<>();
+    private final ListProperty<String> recentTopicsProperty = new SimpleListProperty<>();
 
     private static final String MOST_RECENT_SERVER_KEY = "mostRecentServer";
     private static final String MOST_RECENT_PORT_KEY = "mostRecentPort";
@@ -78,76 +72,68 @@ public class ComposeNotificationController {
 
     private static final String PREFERENCES_LIST_SEPARATOR = "\n";
 
+    private static final int MAX_COMBO_BOX_ITEMS = 10;
+
     private static final Pattern APNS_SIGNING_KEY_WITH_ID_PATTERN =
             Pattern.compile("^APNsAuthKey_([A-Z0-9]{10}).p8$", Pattern.CASE_INSENSITIVE);
 
     private static final PseudoClass EMPTY_PSEUDO_CLASS = PseudoClass.getPseudoClass("empty");
 
-    public ComposeNotificationController() {
-        this.preferences = Preferences.userNodeForPackage(getClass());
-
-        this.mostRecentServer = this.preferences.get(MOST_RECENT_SERVER_KEY, ApnsClientBuilder.PRODUCTION_APNS_HOST);
-        this.mostRecentPort = this.preferences.getInt(MOST_RECENT_PORT_KEY, ApnsClientBuilder.DEFAULT_APNS_PORT);
-
-        try {
-            this.mostRecentDeliveryPriority = DeliveryPriority.valueOf(
-                    this.preferences.get(MOST_RECENT_DELIVERY_PRIORITY_KEY, DeliveryPriority.IMMEDIATE.name()));
-        } catch (final IllegalArgumentException e) {
-            this.mostRecentDeliveryPriority = DeliveryPriority.IMMEDIATE;
-        }
-    }
-
     public void initialize() {
-        this.apnsServerComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-            this.mostRecentServer = newValue;
-            this.preferences.put(MOST_RECENT_SERVER_KEY, this.mostRecentServer);
-        });
+        final Preferences preferences = Preferences.userNodeForPackage(getClass());
 
         this.apnsServerComboBox.setItems(FXCollections.observableArrayList(
                 ApnsClientBuilder.PRODUCTION_APNS_HOST,
                 ApnsClientBuilder.DEVELOPMENT_APNS_HOST));
 
-        this.apnsServerComboBox.setValue(this.mostRecentServer);
-
-        this.apnsPortComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-            this.mostRecentPort = newValue;
-            this.preferences.putInt(MOST_RECENT_PORT_KEY, newValue);
-        });
+        this.apnsServerComboBox.setValue(preferences.get(MOST_RECENT_SERVER_KEY, ApnsClientBuilder.PRODUCTION_APNS_HOST));
 
         this.apnsPortComboBox.setItems(FXCollections.observableArrayList(
                 ApnsClientBuilder.DEFAULT_APNS_PORT,
                 ApnsClientBuilder.ALTERNATE_APNS_PORT));
 
-        this.apnsPortComboBox.setValue(this.mostRecentPort);
+        this.apnsPortComboBox.setValue(preferences.getInt(MOST_RECENT_PORT_KEY, ApnsClientBuilder.DEFAULT_APNS_PORT));
 
-        this.deliveryPriorityComboBox.setValue(this.mostRecentDeliveryPriority);
         this.deliveryPriorityComboBox.setCellFactory(listView -> new DeliveryPriorityListCell());
         this.deliveryPriorityComboBox.setButtonCell(new DeliveryPriorityListCell());
-
-        this.deliveryPriorityComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-            this.mostRecentDeliveryPriority = newValue;
-            this.preferences.put(MOST_RECENT_DELIVERY_PRIORITY_KEY, this.mostRecentDeliveryPriority.name());
-        });
 
         this.deliveryPriorityComboBox.setItems(FXCollections.observableArrayList(
                 DeliveryPriority.IMMEDIATE,
                 DeliveryPriority.CONSERVE_POWER
         ));
 
-        this.recentKeyIds.addAll(loadPreferencesList(RECENT_KEY_IDS_KEY));
-        this.keyIdComboBox.setItems(FXCollections.observableArrayList(this.recentKeyIds));
+        try {
+            this.deliveryPriorityComboBox.setValue(DeliveryPriority.valueOf(preferences.get(MOST_RECENT_DELIVERY_PRIORITY_KEY, DeliveryPriority.IMMEDIATE.name())));
+        } catch (final IllegalArgumentException e) {
+            this.deliveryPriorityComboBox.setValue(DeliveryPriority.IMMEDIATE);
+        }
 
-        this.recentTeamIds.addAll(loadPreferencesList(RECENT_TEAM_IDS_KEY));
-        this.teamIdComboBox.setItems(FXCollections.observableArrayList(this.recentTeamIds));
+        this.recentTopicsProperty.set(FXCollections.observableArrayList(loadPreferencesList(RECENT_TOPICS_KEY)));
+        this.recentTopicsProperty.addListener((ListChangeListener<String>) change -> {
+            savePreferencesList(RECENT_TOPICS_KEY, (List<String>) change.getList());
+        });
 
-        this.recentTopics.addAll(loadPreferencesList(RECENT_TOPICS_KEY));
-        this.topicComboBox.setItems(FXCollections.observableArrayList(this.recentTopics));
+        this.topicComboBox.itemsProperty().bindBidirectional(this.recentTopicsProperty);
 
-        this.recentDeviceTokens.addAll(loadPreferencesList(RECENT_TOKENS_KEY));
-        this.deviceTokenComboBox.setItems(FXCollections.observableArrayList(this.recentDeviceTokens));
+        this.keyIdComboBox.setItems(FXCollections.observableArrayList(loadPreferencesList(RECENT_KEY_IDS_KEY)));
+        this.keyIdComboBox.getItems().addListener((ListChangeListener<String>) change -> {
+            savePreferencesList(RECENT_KEY_IDS_KEY, (List<String>) change.getList());
+        });
 
-        this.recentCollapseIds.addAll(loadPreferencesList(RECENT_COLLAPSE_IDS_KEY));
-        this.collapseIdComboBox.setItems(FXCollections.observableArrayList(this.recentCollapseIds));
+        this.teamIdComboBox.setItems(FXCollections.observableArrayList(loadPreferencesList(RECENT_TEAM_IDS_KEY)));
+        this.teamIdComboBox.getItems().addListener((ListChangeListener<String>) change -> {
+            savePreferencesList(RECENT_TEAM_IDS_KEY, (List<String>) change.getList());
+        });
+
+        this.deviceTokenComboBox.setItems(FXCollections.observableArrayList(loadPreferencesList(RECENT_TOKENS_KEY)));
+        this.deviceTokenComboBox.getItems().addListener((ListChangeListener<String>) change -> {
+            savePreferencesList(RECENT_TOKENS_KEY, (List<String>) change.getList());
+        });
+
+        this.collapseIdComboBox.setItems(FXCollections.observableArrayList(loadPreferencesList(RECENT_COLLAPSE_IDS_KEY)));
+        this.collapseIdComboBox.getItems().addListener((ListChangeListener<String>) change -> {
+            savePreferencesList(RECENT_COLLAPSE_IDS_KEY, (List<String>) change.getList());
+        });
 
         addEmptyPseudoClassListener(this.keyIdComboBox, this.teamIdComboBox, this.topicComboBox, this.deviceTokenComboBox);
         addEmptyPseudoClassListener(this.apnsCredentialFileTextField, this.payloadTextArea);
@@ -213,7 +199,7 @@ public class ComposeNotificationController {
                 final String currentTopic = this.topicComboBox.getValue();
 
                 this.topicComboBox.setEditable(true);
-                this.topicComboBox.setItems(FXCollections.observableArrayList(this.recentTopics));
+                this.topicComboBox.itemsProperty().bindBidirectional(this.recentTopicsProperty);
                 this.topicComboBox.setValue(currentTopic);
 
                 final Matcher matcher = APNS_SIGNING_KEY_WITH_ID_PATTERN.matcher(file.getName());
@@ -264,6 +250,9 @@ public class ComposeNotificationController {
                             this.teamIdLabel.setDisable(true);
                             this.teamIdComboBox.setDisable(true);
 
+                            // If the list of topics is coming strictly from the list in the certificate, we don't want
+                            // to clobber the manually-entered topic history with those values.
+                            this.topicComboBox.itemsProperty().unbindBidirectional(this.recentTopicsProperty);
                             this.topicComboBox.setEditable(false);
 
                             final String currentTopic = this.topicComboBox.getValue();
@@ -290,55 +279,50 @@ public class ComposeNotificationController {
         }
     }
 
-    void saveCurrentFreeformValues() {
-        if (StringUtils.isNotBlank(this.keyIdComboBox.getValue())) {
-            addToListWithFixedSize(this.keyIdComboBox.getValue(), this.recentKeyIds, 10);
+    void handleNotificationSent() {
+        final Preferences preferences = Preferences.userNodeForPackage(getClass());
 
-            this.keyIdComboBox.setItems(FXCollections.observableArrayList(this.recentKeyIds));
-            this.savePreferencesList(RECENT_KEY_IDS_KEY, this.recentKeyIds);
+        preferences.put(MOST_RECENT_SERVER_KEY, this.apnsServerComboBox.getValue());
+        preferences.putInt(MOST_RECENT_PORT_KEY, this.apnsPortComboBox.getValue());
+        preferences.put(MOST_RECENT_DELIVERY_PRIORITY_KEY, this.deliveryPriorityComboBox.getValue().name());
+
+        if (StringUtils.isNotBlank(this.keyIdComboBox.getValue())) {
+            addCurrentValueToComboBoxItems(this.keyIdComboBox);
         }
 
         if (StringUtils.isNotBlank(this.teamIdComboBox.getValue())) {
-            addToListWithFixedSize(this.teamIdComboBox.getValue(), this.recentTeamIds, 10);
-
-            this.teamIdComboBox.setItems(FXCollections.observableArrayList(this.recentTeamIds));
-            this.savePreferencesList(RECENT_TEAM_IDS_KEY, this.recentTeamIds);
+            addCurrentValueToComboBoxItems(this.teamIdComboBox);
         }
 
-        addToListWithFixedSize(this.topicComboBox.getValue(), this.recentTopics, 10);
-
-        this.topicComboBox.setItems(FXCollections.observableArrayList(this.recentTopics));
-        this.savePreferencesList(RECENT_TOPICS_KEY, this.recentTopics);
-
-        addToListWithFixedSize(this.deviceTokenComboBox.getValue(), this.recentDeviceTokens, 10);
-
-        this.deviceTokenComboBox.setItems(FXCollections.observableArrayList(this.recentDeviceTokens));
-        this.savePreferencesList(RECENT_TOKENS_KEY, this.recentDeviceTokens);
+        addCurrentValueToComboBoxItems(this.topicComboBox);
+        addCurrentValueToComboBoxItems(this.deviceTokenComboBox);
 
         if (StringUtils.isNotBlank(this.collapseIdComboBox.getValue())) {
-            addToListWithFixedSize(this.collapseIdComboBox.getValue(), this.recentCollapseIds, 10);
-
-            this.collapseIdComboBox.setItems(FXCollections.observableArrayList(this.recentCollapseIds));
-            this.savePreferencesList(RECENT_COLLAPSE_IDS_KEY, this.recentCollapseIds);
+            addCurrentValueToComboBoxItems(this.collapseIdComboBox);
         }
     }
 
     private void savePreferencesList(final String key, final List<String> values) {
-        this.preferences.put(key, String.join(PREFERENCES_LIST_SEPARATOR, values));
+        Preferences.userNodeForPackage(getClass()).put(key, String.join(PREFERENCES_LIST_SEPARATOR, values));
     }
 
     private List<String> loadPreferencesList(final String key) {
-        return Arrays.asList(this.preferences.get(key, "").split(PREFERENCES_LIST_SEPARATOR));
+        return Arrays.asList(Preferences.userNodeForPackage(getClass()).get(key, "").split(PREFERENCES_LIST_SEPARATOR));
     }
 
-    private static void addToListWithFixedSize(final String string, final List<String> list, final int maxSize) {
-        // Move the new element to the front of the list even if it's already in there at another index.
-        list.remove(string);
-        list.add(0, string);
+    private static<T> void addCurrentValueToComboBoxItems(final ComboBox<T> comboBox) {
+        final T currentValue = comboBox.getValue();
 
-        while (list.size() > maxSize) {
-            list.remove(list.size() - 1);
+        // Even if this item is already in the list, we want to make sure it gets moved to the top.
+        comboBox.getItems().remove(currentValue);
+        comboBox.getItems().add(0, currentValue);
+
+        while (comboBox.getItems().size() > MAX_COMBO_BOX_ITEMS) {
+            comboBox.getItems().remove(comboBox.getItems().size() - 1);
         }
+
+        // In case the current value got deselected while modifying the list, make sure to reset the value.
+        comboBox.setValue(currentValue);
     }
 
     boolean hasRequiredFields() {
