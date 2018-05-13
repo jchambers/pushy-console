@@ -1,5 +1,8 @@
 package com.turo.pushy.console;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import com.turo.pushy.apns.ApnsClient;
 import com.turo.pushy.apns.ApnsClientBuilder;
 import com.turo.pushy.apns.ApnsPushNotification;
@@ -21,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -70,7 +74,8 @@ public class ComposeNotificationController {
     private static final String RECENT_TOKENS_KEY = "recentTokens";
     private static final String RECENT_COLLAPSE_IDS_KEY = "recentCollapseIds";
 
-    private static final String PREFERENCES_LIST_SEPARATOR = "\n";
+    private static final Gson GSON = new Gson();
+    private static final Type STRING_LIST_TYPE = new TypeToken<List<String>>() {}.getType();
 
     private static final int MAX_COMBO_BOX_ITEMS = 10;
 
@@ -109,31 +114,26 @@ public class ComposeNotificationController {
         }
 
         this.recentTopicsProperty.set(FXCollections.observableArrayList(loadPreferencesList(RECENT_TOPICS_KEY)));
-        this.recentTopicsProperty.addListener((ListChangeListener<String>) change -> {
-            savePreferencesList(RECENT_TOPICS_KEY, (List<String>) change.getList());
-        });
+        this.recentTopicsProperty.addListener((ListChangeListener<String>) change ->
+                savePreferencesList(RECENT_TOPICS_KEY, change.getList()));
 
         this.topicComboBox.itemsProperty().bindBidirectional(this.recentTopicsProperty);
 
         this.keyIdComboBox.setItems(FXCollections.observableArrayList(loadPreferencesList(RECENT_KEY_IDS_KEY)));
-        this.keyIdComboBox.getItems().addListener((ListChangeListener<String>) change -> {
-            savePreferencesList(RECENT_KEY_IDS_KEY, (List<String>) change.getList());
-        });
+        this.keyIdComboBox.getItems().addListener((ListChangeListener<String>) change ->
+                savePreferencesList(RECENT_KEY_IDS_KEY, change.getList()));
 
         this.teamIdComboBox.setItems(FXCollections.observableArrayList(loadPreferencesList(RECENT_TEAM_IDS_KEY)));
-        this.teamIdComboBox.getItems().addListener((ListChangeListener<String>) change -> {
-            savePreferencesList(RECENT_TEAM_IDS_KEY, (List<String>) change.getList());
-        });
+        this.teamIdComboBox.getItems().addListener((ListChangeListener<String>) change ->
+                savePreferencesList(RECENT_TEAM_IDS_KEY, change.getList()));
 
         this.deviceTokenComboBox.setItems(FXCollections.observableArrayList(loadPreferencesList(RECENT_TOKENS_KEY)));
-        this.deviceTokenComboBox.getItems().addListener((ListChangeListener<String>) change -> {
-            savePreferencesList(RECENT_TOKENS_KEY, (List<String>) change.getList());
-        });
+        this.deviceTokenComboBox.getItems().addListener((ListChangeListener<String>) change ->
+                savePreferencesList(RECENT_TOKENS_KEY, change.getList()));
 
         this.collapseIdComboBox.setItems(FXCollections.observableArrayList(loadPreferencesList(RECENT_COLLAPSE_IDS_KEY)));
-        this.collapseIdComboBox.getItems().addListener((ListChangeListener<String>) change -> {
-            savePreferencesList(RECENT_COLLAPSE_IDS_KEY, (List<String>) change.getList());
-        });
+        this.collapseIdComboBox.getItems().addListener((ListChangeListener<String>) change ->
+                savePreferencesList(RECENT_COLLAPSE_IDS_KEY, change.getList()));
 
         addEmptyPseudoClassListener(this.keyIdComboBox, this.teamIdComboBox, this.topicComboBox, this.deviceTokenComboBox);
         addEmptyPseudoClassListener(this.apnsCredentialFileTextField, this.payloadTextArea);
@@ -302,12 +302,18 @@ public class ComposeNotificationController {
         }
     }
 
-    private void savePreferencesList(final String key, final List<String> values) {
-        Preferences.userNodeForPackage(getClass()).put(key, String.join(PREFERENCES_LIST_SEPARATOR, values));
+    private void savePreferencesList(final String key, final List<?> values) {
+        Preferences.userNodeForPackage(getClass()).put(key, GSON.toJson(values));
     }
 
     private List<String> loadPreferencesList(final String key) {
-        return Arrays.asList(Preferences.userNodeForPackage(getClass()).get(key, "").split(PREFERENCES_LIST_SEPARATOR));
+        final Preferences preferences = Preferences.userNodeForPackage(getClass());
+
+        try {
+            return GSON.fromJson(preferences.get(key, "[]"), STRING_LIST_TYPE);
+        } catch (final JsonSyntaxException e) {
+            return new ArrayList<>();
+        }
     }
 
     private static<T> void addCurrentValueToComboBoxItems(final ComboBox<T> comboBox) {
