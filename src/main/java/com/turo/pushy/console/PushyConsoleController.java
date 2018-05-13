@@ -95,7 +95,7 @@ public class PushyConsoleController {
         if (this.composeNotificationController.hasRequiredFields()) {
             scene.getStylesheets().remove(PushyConsoleResources.HIGHLIGHT_EMPTY_FIELDS_STYLESHEET);
 
-            this.composeNotificationController.saveCurrentFreeformValues();
+            this.composeNotificationController.handleNotificationSent();
 
             final Task<PushNotificationResponse<ApnsPushNotification>> sendNotificationTask = new Task<PushNotificationResponse<ApnsPushNotification>>() {
 
