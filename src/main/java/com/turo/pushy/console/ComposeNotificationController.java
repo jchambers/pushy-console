@@ -188,10 +188,10 @@ public class ComposeNotificationController {
         final FileChooser fileChooser = new FileChooser();
 
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("PKCS#8 and PKCS#12 files", Arrays.asList("*.p8", "*.p12")),
-                new FileChooser.ExtensionFilter("PKCS#12 files (certificates)", "*.p12"),
-                new FileChooser.ExtensionFilter("PKCS#8 files (signing keys)", "*.p8"),
-                new FileChooser.ExtensionFilter("All files", "*.*"));
+                new FileChooser.ExtensionFilter(this.resources.getString("certificate-chooser.filter.pkcs8_and_pkcs12"), "*.p8", "*.p12"),
+                new FileChooser.ExtensionFilter(this.resources.getString("certificate-chooser.filter.pkcs12"), "*.p12"),
+                new FileChooser.ExtensionFilter(this.resources.getString("certificate-chooser.filter.pkcs8"), "*.p8"),
+                new FileChooser.ExtensionFilter(this.resources.getString("certificate-chooser.filter.all"), "*.*"));
 
         final File file = fileChooser.showOpenDialog(((Node) event.getSource()).getScene().getWindow());
 
