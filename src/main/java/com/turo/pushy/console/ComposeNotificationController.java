@@ -14,6 +14,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -156,30 +157,32 @@ public class ComposeNotificationController {
     private static void addEmptyPseudoClassListener(final ComboBox<String>... comboBoxes) {
         for (final ComboBox<String> comboBox : comboBoxes) {
             comboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-                final boolean oldValueBlank = (oldValue == null || oldValue.trim().isEmpty());
-                final boolean newValueBlank = (newValue == null || newValue.trim().isEmpty());
+                final boolean oldValueBlank = StringUtils.isBlank(oldValue);
+                final boolean newValueBlank = StringUtils.isBlank(newValue);
 
                 if (oldValueBlank != newValueBlank) {
                     comboBox.pseudoClassStateChanged(EMPTY_PSEUDO_CLASS, newValueBlank);
                 }
             });
 
-            comboBox.pseudoClassStateChanged(EMPTY_PSEUDO_CLASS, comboBox.getValue() == null || comboBox.getValue().trim().isEmpty());
+            // Also set the psuedo class immediately based on the control's current state
+            comboBox.pseudoClassStateChanged(EMPTY_PSEUDO_CLASS, StringUtils.isBlank(comboBox.getValue()));
         }
     }
 
     private static void addEmptyPseudoClassListener(final TextInputControl... textInputControls) {
         for (final TextInputControl textInputControl : textInputControls) {
             textInputControl.textProperty().addListener((observable, oldValue, newValue) -> {
-                final boolean oldValueBlank = (oldValue == null || oldValue.trim().isEmpty());
-                final boolean newValueBlank = (newValue == null || newValue.trim().isEmpty());
+                final boolean oldValueBlank = StringUtils.isBlank(oldValue);
+                final boolean newValueBlank = StringUtils.isBlank(newValue);
 
                 if (oldValueBlank != newValueBlank) {
                     textInputControl.pseudoClassStateChanged(EMPTY_PSEUDO_CLASS, newValueBlank);
                 }
             });
 
-            textInputControl.pseudoClassStateChanged(EMPTY_PSEUDO_CLASS, textInputControl.getText() == null || textInputControl.getText().trim().isEmpty());
+            // Also set the psuedo class immediately based on the control's current state
+            textInputControl.pseudoClassStateChanged(EMPTY_PSEUDO_CLASS, StringUtils.isBlank(textInputControl.getText()));
         }
     }
 
@@ -216,7 +219,7 @@ public class ComposeNotificationController {
                 final Matcher matcher = APNS_SIGNING_KEY_WITH_ID_PATTERN.matcher(file.getName());
 
                 if (matcher.matches()) {
-                    if (keyIdComboBox.getValue() == null || keyIdComboBox.getValue().trim().isEmpty()) {
+                    if (StringUtils.isBlank(this.keyIdComboBox.getValue())) {
                         this.keyIdComboBox.setValue(matcher.group(1));
                         this.teamIdComboBox.requestFocus();
                     }
@@ -288,14 +291,14 @@ public class ComposeNotificationController {
     }
 
     void saveCurrentFreeformValues() {
-        if (this.keyIdComboBox.getValue() != null && !this.keyIdComboBox.getValue().trim().isEmpty()) {
+        if (StringUtils.isNotBlank(this.keyIdComboBox.getValue())) {
             addToListWithFixedSize(this.keyIdComboBox.getValue(), this.recentKeyIds, 10);
 
             this.keyIdComboBox.setItems(FXCollections.observableArrayList(this.recentKeyIds));
             this.savePreferencesList(RECENT_KEY_IDS_KEY, this.recentKeyIds);
         }
 
-        if (this.teamIdComboBox.getValue() != null && !this.teamIdComboBox.getValue().trim().isEmpty()) {
+        if (StringUtils.isNotBlank(this.teamIdComboBox.getValue())) {
             addToListWithFixedSize(this.teamIdComboBox.getValue(), this.recentTeamIds, 10);
 
             this.teamIdComboBox.setItems(FXCollections.observableArrayList(this.recentTeamIds));
@@ -312,7 +315,7 @@ public class ComposeNotificationController {
         this.deviceTokenComboBox.setItems(FXCollections.observableArrayList(this.recentDeviceTokens));
         this.savePreferencesList(RECENT_TOKENS_KEY, this.recentDeviceTokens);
 
-        if (this.collapseIdComboBox.getValue() != null && !this.collapseIdComboBox.getValue().trim().isEmpty()) {
+        if (StringUtils.isNotBlank(this.collapseIdComboBox.getValue())) {
             addToListWithFixedSize(this.collapseIdComboBox.getValue(), this.recentCollapseIds, 10);
 
             this.collapseIdComboBox.setItems(FXCollections.observableArrayList(this.recentCollapseIds));
@@ -341,12 +344,12 @@ public class ComposeNotificationController {
     boolean hasRequiredFields() {
         final boolean hasCredentials;
 
-        if (this.apnsCredentialFileTextField.getText() != null && !this.apnsCredentialFileTextField.getText().trim().isEmpty()) {
+        if (StringUtils.isNotBlank(this.apnsCredentialFileTextField.getText())) {
             if (this.certificatePassword != null) {
                 hasCredentials = true;
             } else {
-                final boolean hasKeyId = this.keyIdComboBox.getValue() != null && !this.keyIdComboBox.getValue().trim().isEmpty();
-                final boolean hasTeamId = this.teamIdComboBox.getValue() != null && !this.teamIdComboBox.getValue().trim().isEmpty();
+                final boolean hasKeyId = StringUtils.isNotBlank(this.keyIdComboBox.getValue());
+                final boolean hasTeamId = StringUtils.isNotBlank(this.teamIdComboBox.getValue());
 
                 hasCredentials = hasKeyId && hasTeamId;
             }
@@ -354,9 +357,9 @@ public class ComposeNotificationController {
             hasCredentials = false;
         }
 
-        final boolean hasTopic = this.topicComboBox.getValue() != null && !this.topicComboBox.getValue().trim().isEmpty();
-        final boolean hasToken = this.deviceTokenComboBox.getValue() != null && !this.deviceTokenComboBox.getValue().trim().isEmpty();
-        final boolean hasPayload = this.payloadTextArea.getText() != null && !this.payloadTextArea.getText().trim().isEmpty();
+        final boolean hasTopic = StringUtils.isNotBlank(this.topicComboBox.getValue());
+        final boolean hasToken = StringUtils.isNotBlank(this.deviceTokenComboBox.getValue());
+        final boolean hasPayload = StringUtils.isNotBlank(this.payloadTextArea.getText());
 
         return hasCredentials && hasTopic && hasToken && hasPayload;
     }
@@ -377,8 +380,7 @@ public class ComposeNotificationController {
     }
 
     ApnsPushNotification buildPushNotification() {
-        final String collapseId = collapseIdComboBox.getValue() == null || collapseIdComboBox.getValue().trim().isEmpty() ?
-                null : collapseIdComboBox.getValue();
+        final String collapseId = StringUtils.trimToNull(this.collapseIdComboBox.getValue());
 
         return new SimpleApnsPushNotification(
                 this.deviceTokenComboBox.getValue(),
