@@ -6,6 +6,7 @@ import com.turo.pushy.apns.ApnsPushNotification;
 import com.turo.pushy.apns.DeliveryPriority;
 import com.turo.pushy.apns.auth.ApnsSigningKey;
 import com.turo.pushy.apns.util.SimpleApnsPushNotification;
+import com.turo.pushy.console.util.CertificateUtil;
 import javafx.collections.FXCollections;
 import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
@@ -15,11 +16,11 @@ import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.*;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -78,8 +79,6 @@ public class ComposeNotificationController {
 
     private static final Pattern APNS_SIGNING_KEY_WITH_ID_PATTERN =
             Pattern.compile("^APNsAuthKey_([A-Z0-9]{10}).p8$", Pattern.CASE_INSENSITIVE);
-
-    private static final Pattern CERTIFICATE_TOPIC_PATTERN = Pattern.compile(".*UID=([^,]+).*");
 
     private static final PseudoClass EMPTY_PSEUDO_CLASS = PseudoClass.getPseudoClass("empty");
 
@@ -228,7 +227,7 @@ public class ComposeNotificationController {
                 // Couldn't load the given file as a signing key. Try it as a P12 certificate instead.
                 final PasswordInputDialog passwordInputDialog = new PasswordInputDialog(password -> {
                     try {
-                        getFirstPrivateKeyEntry(file, password);
+                        CertificateUtil.getFirstPrivateKeyEntry(file, password);
                         return true;
                     } catch (final KeyStoreException | IOException e1) {
                         return false;
@@ -244,37 +243,29 @@ public class ComposeNotificationController {
                 final Optional<String> verifiedPassword = passwordInputDialog.showAndWait();
 
                 verifiedPassword.ifPresent(password -> {
-                    this.certificatePassword = password;
-                    this.apnsCredentialFileTextField.setText(file.getAbsolutePath());
-
-                    this.keyIdComboBox.setValue(null);
-                    this.teamIdComboBox.setValue(null);
-
-                    this.keyIdLabel.setDisable(true);
-                    this.keyIdComboBox.setDisable(true);
-                    this.teamIdLabel.setDisable(true);
-                    this.teamIdComboBox.setDisable(true);
-
-                    this.topicComboBox.setEditable(false);
-
-                    final String currentTopic = this.topicComboBox.getValue();
-
-                    final String baseTopicFromCertificate;
-
                     try {
-                        final KeyStore.PrivateKeyEntry privateKeyEntry = getFirstPrivateKeyEntry(file, password);
-                        final X509Certificate certificate = (X509Certificate) privateKeyEntry.getCertificate();
+                        final KeyStore.PrivateKeyEntry privateKeyEntry = CertificateUtil.getFirstPrivateKeyEntry(file, password);
 
-                        final Matcher topicMatcher =
-                                CERTIFICATE_TOPIC_PATTERN.matcher(certificate.getSubjectX500Principal().getName());
+                        final List<String> topics = new ArrayList<>(CertificateUtil.extractApnsTopicsFromCertificate(privateKeyEntry.getCertificate()));
+                        topics.sort(Comparator.comparingInt(String::length));
 
-                        if (topicMatcher.matches()) {
-                            baseTopicFromCertificate = topicMatcher.group(1);
+                        if (!topics.isEmpty()) {
+                            this.certificatePassword = password;
+                            this.apnsCredentialFileTextField.setText(file.getAbsolutePath());
 
-                            this.topicComboBox.setItems(FXCollections.observableArrayList(
-                                    baseTopicFromCertificate,
-                                    baseTopicFromCertificate + ".voip",
-                                    baseTopicFromCertificate + ".complication"));
+                            this.keyIdComboBox.setValue(null);
+                            this.teamIdComboBox.setValue(null);
+
+                            this.keyIdLabel.setDisable(true);
+                            this.keyIdComboBox.setDisable(true);
+                            this.teamIdLabel.setDisable(true);
+                            this.teamIdComboBox.setDisable(true);
+
+                            this.topicComboBox.setEditable(false);
+
+                            final String currentTopic = this.topicComboBox.getValue();
+
+                            this.topicComboBox.setItems(FXCollections.observableArrayList(topics));
 
                             this.topicComboBox.setValue(this.topicComboBox.getItems().contains(currentTopic) ?
                                     currentTopic : this.topicComboBox.getItems().get(0));
@@ -289,47 +280,11 @@ public class ComposeNotificationController {
                         }
                     } catch (final KeyStoreException | IOException e1) {
                         // This should never happen because we already loaded the certificate to check the password.
-                        throw new RuntimeException(e);
+                        throw new RuntimeException(e1);
                     }
                 });
             }
         }
-    }
-
-    private static KeyStore.PrivateKeyEntry getFirstPrivateKeyEntry(final File p12File, final String password) throws KeyStoreException, IOException {
-        final char[] passwordCharacters = password.toCharArray();
-        final KeyStore keyStore = KeyStore.getInstance("PKCS12");
-
-        try (final FileInputStream certificateInputStream = new FileInputStream(p12File)) {
-            keyStore.load(certificateInputStream, passwordCharacters);
-        } catch (NoSuchAlgorithmException | CertificateException e) {
-            throw new KeyStoreException(e);
-        }
-
-        final Enumeration<String> aliases = keyStore.aliases();
-        final KeyStore.PasswordProtection passwordProtection = new KeyStore.PasswordProtection(passwordCharacters);
-
-        while (aliases.hasMoreElements()) {
-            final String alias = aliases.nextElement();
-
-            KeyStore.Entry entry;
-
-            try {
-                try {
-                    entry = keyStore.getEntry(alias, passwordProtection);
-                } catch (final UnsupportedOperationException e) {
-                    entry = keyStore.getEntry(alias, null);
-                }
-            } catch (final UnrecoverableEntryException | NoSuchAlgorithmException e) {
-                throw new KeyStoreException(e);
-            }
-
-            if (entry instanceof KeyStore.PrivateKeyEntry) {
-                return (KeyStore.PrivateKeyEntry) entry;
-            }
-        }
-
-        throw new KeyStoreException("Key store did not contain any private key entries.");
     }
 
     void saveCurrentFreeformValues() {
