@@ -8,6 +8,44 @@
     <groupId>com.turo</groupId>
     <artifactId>pushy-console</artifactId>
     <version>0.1-SNAPSHOT</version>
+    <name>Pushy Console</name>
+    <description>A simple GUI app for sending APNs (iOS/macOS/Safari) push notifications</description>
+    <inceptionYear>2018</inceptionYear>
+    <url>https://github.com/turo/pushy-console</url>
+
+    <organization>
+        <name>Turo</name>
+        <url>https://turo.com/</url>
+    </organization>
+
+    <developers>
+        <developer>
+            <id>jon</id>
+            <name>Jon Chambers</name>
+            <email>jon@turo.com</email>
+            <url>https://github.com/jchambers</url>
+            <organization>Turo</organization>
+            <organizationUrl>https://turo.com/</organizationUrl>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>-5</timezone>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git@github.com:turo/pushy-console.git</connection>
+        <developerConnection>scm:git@github.com:turo/pushy-console.git</developerConnection>
+        <url>https://github.com/turo/pushy-console</url>
+    </scm>
+
+    <licenses>
+        <license>
+            <name>The MIT License (MIT)</name>
+            <url>http://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <dependencies>
         <dependency>
@@ -26,6 +64,34 @@
                     <source>8</source>
                     <target>8</target>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.zenjava</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>8.6.0</version>
+                <configuration>
+                    <mainClass>com.turo.pushy.console</mainClass>
+                    <identifier>Pushy Console</identifier>
+                    <needMenu>true</needMenu>
+                </configuration>
+                <executions>
+                    <execution>
+                        <!-- required before build-native -->
+                        <id>create-jfxjar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build-jar</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>create-native</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build-native</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
