@@ -50,21 +50,21 @@ public class ComposeNotificationController {
 
     @FXML private ResourceBundle resources;
 
-    @FXML private ComboBox<String> apnsServerComboBox;
-    @FXML private ComboBox<Integer> apnsPortComboBox;
-    @FXML private TextField apnsCredentialFileTextField;
+    @FXML ComboBox<String> apnsServerComboBox;
+    @FXML ComboBox<Integer> apnsPortComboBox;
+    @FXML TextField apnsCredentialFileTextField;
 
-    @FXML private Label keyIdLabel;
-    @FXML private ComboBox<String> keyIdComboBox;
-    @FXML private Label teamIdLabel;
-    @FXML private ComboBox<String> teamIdComboBox;
+    @FXML Label keyIdLabel;
+    @FXML ComboBox<String> keyIdComboBox;
+    @FXML Label teamIdLabel;
+    @FXML ComboBox<String> teamIdComboBox;
 
-    @FXML private ComboBox<String> topicComboBox;
-    @FXML private ComboBox<String> deviceTokenComboBox;
-    @FXML private ComboBox<String> collapseIdComboBox;
-    @FXML private ComboBox<DeliveryPriority> deliveryPriorityComboBox;
-    @FXML private MenuButton recentPayloadsMenuButton;
-    @FXML private TextArea payloadTextArea;
+    @FXML ComboBox<String> topicComboBox;
+    @FXML ComboBox<String> deviceTokenComboBox;
+    @FXML ComboBox<String> collapseIdComboBox;
+    @FXML ComboBox<DeliveryPriority> deliveryPriorityComboBox;
+    @FXML MenuButton recentPayloadsMenuButton;
+    @FXML TextArea payloadTextArea;
 
     private final ReadOnlyStringWrapper apnsServerWrapper = new ReadOnlyStringWrapper();
     private final ReadOnlyIntegerWrapper apnsPortWrapper = new ReadOnlyIntegerWrapper();
@@ -180,7 +180,7 @@ public class ComposeNotificationController {
             }
         });
 
-        final BooleanBinding credentialsFileIsCertificateBinding = new BooleanBinding() {
+        final BooleanBinding credentialsFileIsNotSigningKeyBinding = new BooleanBinding() {
             {
                 super.bind(credentialsFileAndPasswordProperty);
             }
@@ -188,13 +188,13 @@ public class ComposeNotificationController {
             @Override
             protected boolean computeValue() {
                 final Pair<File, String> credentialsFileAndPassword = credentialsFileAndPasswordProperty.get();
-                return credentialsFileAndPassword != null && credentialsFileAndPassword.getValue() != null;
+                return credentialsFileAndPassword == null || credentialsFileAndPassword.getValue() != null;
             }
         };
 
         keyIdLabel.disableProperty().bind(keyIdComboBox.disabledProperty());
 
-        keyIdComboBox.disableProperty().bind(credentialsFileIsCertificateBinding);
+        keyIdComboBox.disableProperty().bind(credentialsFileIsNotSigningKeyBinding);
         keyIdComboBox.disabledProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 keyIdComboBox.setValue(null);
@@ -207,7 +207,7 @@ public class ComposeNotificationController {
 
         teamIdLabel.disableProperty().bind(teamIdComboBox.disabledProperty());
 
-        teamIdComboBox.disableProperty().bind(credentialsFileIsCertificateBinding);
+        teamIdComboBox.disableProperty().bind(credentialsFileIsNotSigningKeyBinding);
         teamIdComboBox.disabledProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 teamIdComboBox.setValue(null);
@@ -395,20 +395,7 @@ public class ComposeNotificationController {
 
         if (file != null) {
             try {
-                ApnsSigningKey.loadFromPkcs8File(file, "temp", "temp");
-
-                credentialsFileAndPasswordProperty.set(new Pair<>(file, null));
-
-                final Matcher matcher = APNS_SIGNING_KEY_WITH_ID_PATTERN.matcher(file.getName());
-
-                if (matcher.matches()) {
-                    if (StringUtils.isBlank(keyIdComboBox.getValue())) {
-                        keyIdComboBox.setValue(matcher.group(1));
-                        teamIdComboBox.requestFocus();
-                    }
-                } else {
-                    keyIdComboBox.requestFocus();
-                }
+                handleSigningKeyFileSelection(file);
             } catch (final NoSuchAlgorithmException | IOException | InvalidKeyException e) {
                 // Couldn't load the given file as a signing key. Try it as a P12 certificate instead.
                 final PasswordInputDialog passwordInputDialog = new PasswordInputDialog(password -> {
@@ -430,11 +417,7 @@ public class ComposeNotificationController {
 
                 verifiedPassword.ifPresent(password -> {
                     try {
-                        if (CertificateUtil.extractApnsTopicsFromCertificate(file, password).isEmpty()) {
-                            throw new CertificateException("Certificate does not name any APNs topics.");
-                        }
-
-                        credentialsFileAndPasswordProperty.set(new Pair<>(file, password));
+                        handleCertificateFileAndPasswordSelection(file, password);
                     } catch (final IOException | KeyStoreException | CertificateException e1) {
                         final Alert alert = new Alert(Alert.AlertType.WARNING);
 
@@ -447,6 +430,31 @@ public class ComposeNotificationController {
                 });
             }
         }
+    }
+
+    void handleSigningKeyFileSelection(final File signingKeyFile) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+        ApnsSigningKey.loadFromPkcs8File(signingKeyFile, "temp", "temp");
+
+        credentialsFileAndPasswordProperty.set(new Pair<>(signingKeyFile, null));
+
+        final Matcher matcher = APNS_SIGNING_KEY_WITH_ID_PATTERN.matcher(signingKeyFile.getName());
+
+        if (matcher.matches()) {
+            if (StringUtils.isBlank(keyIdComboBox.getValue())) {
+                keyIdComboBox.setValue(matcher.group(1));
+                teamIdComboBox.requestFocus();
+            }
+        } else {
+            keyIdComboBox.requestFocus();
+        }
+    }
+
+    void handleCertificateFileAndPasswordSelection(final File certificateFile, final String password) throws IOException, KeyStoreException, CertificateException {
+        if (CertificateUtil.extractApnsTopicsFromCertificate(certificateFile, password).isEmpty()) {
+            throw new CertificateException("Certificate does not name any APNs topics.");
+        }
+
+        credentialsFileAndPasswordProperty.set(new Pair<>(certificateFile, password));
     }
 
     /**
