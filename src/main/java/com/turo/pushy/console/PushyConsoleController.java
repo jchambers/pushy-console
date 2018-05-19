@@ -1,10 +1,11 @@
 package com.turo.pushy.console;
 
-import com.turo.pushy.apns.ApnsClient;
-import com.turo.pushy.apns.ApnsPushNotification;
-import com.turo.pushy.apns.DeliveryPriority;
-import com.turo.pushy.apns.PushNotificationResponse;
+import com.turo.pushy.apns.*;
+import com.turo.pushy.apns.auth.ApnsSigningKey;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -38,6 +39,8 @@ public class PushyConsoleController {
     @FXML private TableColumn<PushNotificationResponse<ApnsPushNotification>, String> notificationResultStatusColumn;
     @FXML private TableColumn<PushNotificationResponse<ApnsPushNotification>, String> notificationResultDetailsColumn;
     @FXML private TableColumn<PushNotificationResponse<ApnsPushNotification>, String> notificationResultApnsIdColumn;
+
+    private final BooleanProperty readyToSendProperty = new SimpleBooleanProperty();
 
     private final ExecutorService sendNotificationExecutorService = Executors.newSingleThreadExecutor();
 
@@ -86,13 +89,26 @@ public class PushyConsoleController {
 
         notificationResultApnsIdColumn.setCellValueFactory(cellDataFeatures ->
                 new ReadOnlyStringWrapper(cellDataFeatures.getValue().getApnsId().toString()));
+
+        this.readyToSendProperty.bind(new BooleanBinding() {
+            {
+                super.bind(PushyConsoleController.this.composeNotificationController.apnsCredentialsProperty(),
+                        PushyConsoleController.this.composeNotificationController.pushNotificationProperty());
+            }
+
+            @Override
+            protected boolean computeValue() {
+                return PushyConsoleController.this.composeNotificationController.apnsCredentialsProperty().get() != null &&
+                        PushyConsoleController.this.composeNotificationController.pushNotificationProperty().get() != null;
+            }
+        });
     }
 
     @FXML
     protected void handleSendNotificationButtonAction(final ActionEvent event) {
         final Scene scene = ((Node) event.getSource()).getScene();
 
-        if (this.composeNotificationController.hasRequiredFields()) {
+        if (this.readyToSendProperty.get()) {
             scene.getStylesheets().remove(PushyConsoleResources.HIGHLIGHT_EMPTY_FIELDS_STYLESHEET);
 
             this.composeNotificationController.handleNotificationSent();
@@ -101,24 +117,37 @@ public class PushyConsoleController {
 
                 @Override
                 protected PushNotificationResponse<ApnsPushNotification> call() throws Exception {
-                    final ApnsClient apnsClient = PushyConsoleController.this.composeNotificationController.buildClient();
+                    final String server = PushyConsoleController.this.composeNotificationController.apnsServerProperty().get();
+                    final int port = PushyConsoleController.this.composeNotificationController.apnsPortProperty().get();
+                    final ApnsCredentials credentials = PushyConsoleController.this.composeNotificationController.apnsCredentialsProperty().get();
+
+                    final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder();
+                    apnsClientBuilder.setApnsServer(server, port);
+
+                    if (credentials.getCredentialsFile().isCertificate()) {
+                        apnsClientBuilder.setClientCredentials(credentials.getCredentialsFile().getFile(),
+                                credentials.getCredentialsFile().getCertificatePassword());
+                    } else {
+                        apnsClientBuilder.setSigningKey(ApnsSigningKey.loadFromPkcs8File(
+                                credentials.getCredentialsFile().getFile(), credentials.getTeamId(), credentials.getKeyId()));
+                    }
+
+                    final ApnsClient apnsClient = apnsClientBuilder.build();
 
                     try {
                         return apnsClient.sendNotification(
-                                PushyConsoleController.this.composeNotificationController.buildPushNotification()).get();
+                                PushyConsoleController.this.composeNotificationController.pushNotificationProperty().get()).get();
                     } finally {
                         apnsClient.close();
                     }
                 }
             };
 
-            sendNotificationTask.setOnSucceeded(workerStateEvent -> {
-                this.notificationResultTableView.getItems().add(sendNotificationTask.getValue());
-            });
+            sendNotificationTask.setOnSucceeded(workerStateEvent ->
+                    this.notificationResultTableView.getItems().add(sendNotificationTask.getValue()));
 
-            sendNotificationTask.setOnFailed(workerStateEvent -> {
-                reportPushNotificationError(sendNotificationTask.getException());
-            });
+            sendNotificationTask.setOnFailed(workerStateEvent ->
+                    reportPushNotificationError(sendNotificationTask.getException()));
 
             this.sendNotificationExecutorService.execute(sendNotificationTask);
         } else {
@@ -153,7 +182,7 @@ public class PushyConsoleController {
         alert.showAndWait();
     }
 
-    public void stop() {
+    void stop() {
         this.sendNotificationExecutorService.shutdown();
     }
 }
