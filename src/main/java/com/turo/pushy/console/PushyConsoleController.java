@@ -152,4 +152,8 @@ public class PushyConsoleController {
 
         alert.showAndWait();
     }
+
+    public void stop() {
+        this.sendNotificationExecutorService.shutdown();
+    }
 }
