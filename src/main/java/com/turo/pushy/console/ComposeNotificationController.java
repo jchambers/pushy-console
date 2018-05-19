@@ -3,7 +3,6 @@ package com.turo.pushy.console;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-import com.turo.pushy.apns.ApnsClient;
 import com.turo.pushy.apns.ApnsClientBuilder;
 import com.turo.pushy.apns.ApnsPushNotification;
 import com.turo.pushy.apns.DeliveryPriority;
@@ -11,11 +10,9 @@ import com.turo.pushy.apns.auth.ApnsSigningKey;
 import com.turo.pushy.apns.util.SimpleApnsPushNotification;
 import com.turo.pushy.console.util.CertificateUtil;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -68,7 +65,13 @@ public class ComposeNotificationController {
     @FXML private MenuButton recentPayloadsMenuButton;
     @FXML private TextArea payloadTextArea;
 
+    private final ReadOnlyStringWrapper apnsServerWrapper = new ReadOnlyStringWrapper();
+    private final ReadOnlyIntegerWrapper apnsPortWrapper = new ReadOnlyIntegerWrapper();
+
     private final ObjectProperty<ApnsCredentialsFile> apnsCredentialsFileProperty = new SimpleObjectProperty<>();
+    private final ReadOnlyObjectWrapper<ApnsCredentials> apnsCredentialsWrapper = new ReadOnlyObjectWrapper<>();
+
+    private final ReadOnlyObjectWrapper<ApnsPushNotification> pushNotificationWrapper = new ReadOnlyObjectWrapper<>();
 
     private final ListProperty<String> recentTopicsProperty = new SimpleListProperty<>();
     private final ObservableList<String> recentPayloads = FXCollections.observableArrayList();
@@ -237,6 +240,73 @@ public class ComposeNotificationController {
 
         addEmptyPseudoClassListener(this.keyIdComboBox, this.teamIdComboBox, this.topicComboBox, this.deviceTokenComboBox);
         addEmptyPseudoClassListener(this.apnsCredentialFileTextField, this.payloadTextArea);
+
+        this.apnsServerWrapper.bind(this.apnsServerComboBox.valueProperty());
+        this.apnsPortWrapper.bind(this.apnsPortComboBox.valueProperty());
+
+        this.apnsCredentialsWrapper.bind(new ObjectBinding<ApnsCredentials>() {
+            {
+                super.bind(ComposeNotificationController.this.apnsCredentialsFileProperty,
+                        ComposeNotificationController.this.keyIdComboBox.valueProperty(),
+                        ComposeNotificationController.this.teamIdComboBox.valueProperty());
+            }
+
+            @Override
+            protected ApnsCredentials computeValue() {
+                final ApnsCredentials credentials;
+
+                final ApnsCredentialsFile credentialsFile = ComposeNotificationController.this.apnsCredentialsFileProperty.get();
+
+                if (credentialsFile != null) {
+                    if (credentialsFile.isCertificate()) {
+                        credentials = new ApnsCredentials(credentialsFile);
+                    } else {
+                        final String keyId = ComposeNotificationController.this.keyIdComboBox.getValue();
+                        final String teamId = ComposeNotificationController.this.teamIdComboBox.getValue();
+
+                        final boolean hasKeyId = StringUtils.isNotBlank(keyId);
+                        final boolean hasTeamId = StringUtils.isNotBlank(teamId);
+
+                        credentials = (hasKeyId && hasTeamId) ? new ApnsCredentials(credentialsFile, keyId, teamId) : null;
+                    }
+                } else {
+                    credentials = null;
+                }
+
+                return credentials;
+            }
+        });
+
+        this.pushNotificationWrapper.bind(new ObjectBinding<ApnsPushNotification>() {
+            {
+                super.bind(ComposeNotificationController.this.deviceTokenComboBox.valueProperty(),
+                        ComposeNotificationController.this.topicComboBox.valueProperty(),
+                        ComposeNotificationController.this.payloadTextArea.textProperty(),
+                        ComposeNotificationController.this.deliveryPriorityComboBox.valueProperty(),
+                        ComposeNotificationController.this.collapseIdComboBox.valueProperty());
+            }
+            @Override
+            protected ApnsPushNotification computeValue() {
+                final String deviceToken = ComposeNotificationController.this.deviceTokenComboBox.getValue();
+                final String topic = ComposeNotificationController.this.topicComboBox.getValue();
+                final String payload = ComposeNotificationController.this.payloadTextArea.getText();
+                final DeliveryPriority deliveryPriority = ComposeNotificationController.this.deliveryPriorityComboBox.getValue();
+                final String collapseId = ComposeNotificationController.this.collapseIdComboBox.getValue();
+
+                final ApnsPushNotification pushNotification;
+
+                if (StringUtils.isNoneBlank(deviceToken, topic, payload)) {
+                    final Date expiration = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
+
+                    pushNotification = new SimpleApnsPushNotification(deviceToken, topic, payload, expiration,
+                            deliveryPriority, StringUtils.trimToNull(collapseId));
+                } else {
+                    pushNotification = null;
+                }
+
+                return pushNotification;
+            }
+        });
     }
 
     @SafeVarargs
@@ -397,58 +467,19 @@ public class ComposeNotificationController {
         comboBox.setValue(currentValue);
     }
 
-    boolean hasRequiredFields() {
-        final boolean hasCredentials;
-
-        final ApnsCredentialsFile credentialsFile = this.apnsCredentialsFileProperty.get();
-
-        if (credentialsFile != null) {
-            if (credentialsFile.isCertificate()) {
-                hasCredentials = true;
-            } else {
-                final boolean hasKeyId = StringUtils.isNotBlank(this.keyIdComboBox.getValue());
-                final boolean hasTeamId = StringUtils.isNotBlank(this.teamIdComboBox.getValue());
-
-                hasCredentials = hasKeyId && hasTeamId;
-            }
-        } else {
-            hasCredentials = false;
-        }
-
-        final boolean hasTopic = StringUtils.isNotBlank(this.topicComboBox.getValue());
-        final boolean hasToken = StringUtils.isNotBlank(this.deviceTokenComboBox.getValue());
-        final boolean hasPayload = StringUtils.isNotBlank(this.payloadTextArea.getText());
-
-        return hasCredentials && hasTopic && hasToken && hasPayload;
+    public ReadOnlyStringProperty apnsServerProperty() {
+        return this.apnsServerWrapper.getReadOnlyProperty();
     }
 
-    ApnsClient buildClient() throws IOException, InvalidKeyException, NoSuchAlgorithmException {
-        final ApnsCredentialsFile credentialsFile = this.apnsCredentialsFileProperty.get();
-        Objects.requireNonNull(credentialsFile, "APNs credentials must not be null.");
-
-        final ApnsClientBuilder builder = new ApnsClientBuilder();
-
-        builder.setApnsServer(this.apnsServerComboBox.getValue(), this.apnsPortComboBox.getValue());
-
-        if (this.apnsCredentialsFileProperty.get().isCertificate()) {
-            builder.setClientCredentials(credentialsFile.getFile(), credentialsFile.getCertificatePassword());
-        } else {
-            builder.setSigningKey(ApnsSigningKey.loadFromPkcs8File(credentialsFile.getFile(),
-                    this.teamIdComboBox.getValue(), this.keyIdComboBox.getValue()));
-        }
-
-        return builder.build();
+    public ReadOnlyIntegerProperty apnsPortProperty() {
+        return this.apnsPortWrapper.getReadOnlyProperty();
     }
 
-    ApnsPushNotification buildPushNotification() {
-        final String collapseId = StringUtils.trimToNull(this.collapseIdComboBox.getValue());
+    public ReadOnlyObjectProperty<ApnsCredentials> apnsCredentialsProperty() {
+        return this.apnsCredentialsWrapper.getReadOnlyProperty();
+    }
 
-        return new SimpleApnsPushNotification(
-                this.deviceTokenComboBox.getValue(),
-                this.topicComboBox.getValue(),
-                this.payloadTextArea.getText(),
-                new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1)),
-                this.deliveryPriorityComboBox.getValue(),
-                collapseId);
+    public ReadOnlyObjectProperty<ApnsPushNotification> pushNotificationProperty() {
+        return this.pushNotificationWrapper.getReadOnlyProperty();
     }
 }
