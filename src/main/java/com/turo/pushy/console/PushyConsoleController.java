@@ -124,12 +124,11 @@ public class PushyConsoleController {
                     final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder();
                     apnsClientBuilder.setApnsServer(server, port);
 
-                    if (credentials.getCredentialsFile().isCertificate()) {
-                        apnsClientBuilder.setClientCredentials(credentials.getCredentialsFile().getFile(),
-                                credentials.getCredentialsFile().getCertificatePassword());
+                    if (credentials.isCertificate()) {
+                        apnsClientBuilder.setClientCredentials(credentials.getCredentialsFile(), credentials.getCertificatePassword());
                     } else {
                         apnsClientBuilder.setSigningKey(ApnsSigningKey.loadFromPkcs8File(
-                                credentials.getCredentialsFile().getFile(), credentials.getTeamId(), credentials.getKeyId()));
+                                credentials.getCredentialsFile(), credentials.getTeamId(), credentials.getKeyId()));
                     }
 
                     final ApnsClient apnsClient = apnsClientBuilder.build();

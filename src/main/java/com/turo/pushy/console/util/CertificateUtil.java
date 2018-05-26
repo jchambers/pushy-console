@@ -58,8 +58,13 @@ public class CertificateUtil {
         throw new KeyStoreException("Key store did not contain any private key entries suitable for use as APNs client credentials.");
     }
 
+    public static Set<String> extractApnsTopicsFromCertificate(final File certificateFile, final String password) throws IOException, KeyStoreException {
+        final KeyStore.PrivateKeyEntry privateKeyEntry = getFirstPrivateKeyEntry(certificateFile, password);
+        return extractApnsTopicsFromCertificate(privateKeyEntry.getCertificate());
+    }
+
     public static Set<String> extractApnsTopicsFromCertificate(final Certificate certificate) throws IOException {
-        final Set<String> topics = new HashSet<String>();
+        final Set<String> topics = new HashSet<>();
 
         if (certificate instanceof X509Certificate) {
             final X509Certificate x509Certificate = (X509Certificate) certificate;

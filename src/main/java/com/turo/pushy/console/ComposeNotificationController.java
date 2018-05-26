@@ -22,6 +22,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
+import javafx.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -68,7 +69,7 @@ public class ComposeNotificationController {
     private final ReadOnlyStringWrapper apnsServerWrapper = new ReadOnlyStringWrapper();
     private final ReadOnlyIntegerWrapper apnsPortWrapper = new ReadOnlyIntegerWrapper();
 
-    private final ObjectProperty<ApnsCredentialsFile> apnsCredentialsFileProperty = new SimpleObjectProperty<>();
+    private final ObjectProperty<Pair<File, String>> credentialsFileAndPasswordProperty = new SimpleObjectProperty<>();
     private final ReadOnlyObjectWrapper<ApnsCredentials> apnsCredentialsWrapper = new ReadOnlyObjectWrapper<>();
 
     private final ReadOnlyObjectWrapper<ApnsPushNotification> pushNotificationWrapper = new ReadOnlyObjectWrapper<>();
@@ -113,13 +114,13 @@ public class ComposeNotificationController {
 
         this.apnsCredentialFileTextField.textProperty().bind(new StringBinding() {
             {
-                super.bind(ComposeNotificationController.this.apnsCredentialsFileProperty);
+                super.bind(ComposeNotificationController.this.credentialsFileAndPasswordProperty);
             }
 
             @Override
             protected String computeValue() {
-                final ApnsCredentialsFile credentialsFile = ComposeNotificationController.this.apnsCredentialsFileProperty.get();
-                return credentialsFile != null ? credentialsFile.getFile().getAbsolutePath() : null;
+                final Pair<File, String> credentialsFileAndPassword = ComposeNotificationController.this.credentialsFileAndPasswordProperty.get();
+                return credentialsFileAndPassword != null ? credentialsFileAndPassword.getKey().getAbsolutePath() : null;
             }
         });
 
@@ -143,18 +144,27 @@ public class ComposeNotificationController {
 
         this.topicComboBox.itemsProperty().bind(this.recentTopicsProperty);
 
-        this.apnsCredentialsFileProperty.addListener((observable, oldValue, newValue) -> {
-            if (newValue != null && newValue.isCertificate()) {
-                // When working with certificates, we'll always have a fixed list of topics from the certificate and
-                // should not allow freeform editing.
-                this.topicComboBox.setEditable(false);
+        this.credentialsFileAndPasswordProperty.addListener((observable, oldValue, newValue) -> {
+            // If we have a password, we're dealing with a certificate
+            if (newValue != null && newValue.getValue() != null) {
 
-                this.topicComboBox.itemsProperty().unbind();
+                try {
+                    final List<String> topics = new ArrayList<>(CertificateUtil.extractApnsTopicsFromCertificate(newValue.getKey(), newValue.getValue()));
+                    topics.sort(Comparator.naturalOrder());
 
-                this.topicComboBox.setItems(FXCollections.observableArrayList(newValue.getTopicsFromCertificate()));
+                    // When working with certificates, we'll always have a fixed list of topics from the certificate and
+                    // should not allow freeform editing.
+                    this.topicComboBox.setEditable(false);
 
-                if (!this.topicComboBox.getItems().contains(this.topicComboBox.getValue())) {
-                    this.topicComboBox.setValue(this.topicComboBox.getItems().get(0));
+                    this.topicComboBox.itemsProperty().unbind();
+                    this.topicComboBox.setItems(FXCollections.observableArrayList(topics));
+
+                    if (!this.topicComboBox.getItems().contains(this.topicComboBox.getValue())) {
+                        this.topicComboBox.setValue(this.topicComboBox.getItems().get(0));
+                    }
+                } catch (final KeyStoreException | IOException e) {
+                    // This should never happen since we checked the certificate when it was first selected
+                    throw new RuntimeException(e);
                 }
             } else {
                 this.topicComboBox.setEditable(true);
@@ -162,21 +172,21 @@ public class ComposeNotificationController {
             }
         });
 
-        final BooleanBinding certificateCredentialsBinding = new BooleanBinding() {
+        final BooleanBinding credentialsFileIsCertificateBinding = new BooleanBinding() {
             {
-                super.bind(ComposeNotificationController.this.apnsCredentialsFileProperty);
+                super.bind(ComposeNotificationController.this.credentialsFileAndPasswordProperty);
             }
 
             @Override
             protected boolean computeValue() {
-                final ApnsCredentialsFile credentialsFile = ComposeNotificationController.this.apnsCredentialsFileProperty.get();
-                return credentialsFile != null && credentialsFile.isCertificate();
+                final Pair<File, String> credentialsFileAndPassword = ComposeNotificationController.this.credentialsFileAndPasswordProperty.get();
+                return credentialsFileAndPassword != null && credentialsFileAndPassword.getValue() != null;
             }
         };
 
         this.keyIdLabel.disableProperty().bind(this.keyIdComboBox.disabledProperty());
 
-        this.keyIdComboBox.disableProperty().bind(certificateCredentialsBinding);
+        this.keyIdComboBox.disableProperty().bind(credentialsFileIsCertificateBinding);
         this.keyIdComboBox.disabledProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 this.keyIdComboBox.setValue(null);
@@ -189,7 +199,7 @@ public class ComposeNotificationController {
 
         this.teamIdLabel.disableProperty().bind(this.teamIdComboBox.disabledProperty());
 
-        this.teamIdComboBox.disableProperty().bind(certificateCredentialsBinding);
+        this.teamIdComboBox.disableProperty().bind(credentialsFileIsCertificateBinding);
         this.teamIdComboBox.disabledProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 this.teamIdComboBox.setValue(null);
@@ -246,7 +256,7 @@ public class ComposeNotificationController {
 
         this.apnsCredentialsWrapper.bind(new ObjectBinding<ApnsCredentials>() {
             {
-                super.bind(ComposeNotificationController.this.apnsCredentialsFileProperty,
+                super.bind(ComposeNotificationController.this.credentialsFileAndPasswordProperty,
                         ComposeNotificationController.this.keyIdComboBox.valueProperty(),
                         ComposeNotificationController.this.teamIdComboBox.valueProperty());
             }
@@ -255,11 +265,11 @@ public class ComposeNotificationController {
             protected ApnsCredentials computeValue() {
                 final ApnsCredentials credentials;
 
-                final ApnsCredentialsFile credentialsFile = ComposeNotificationController.this.apnsCredentialsFileProperty.get();
+                final Pair<File, String> credentialsFileAndPassword = ComposeNotificationController.this.credentialsFileAndPasswordProperty.get();
 
-                if (credentialsFile != null) {
-                    if (credentialsFile.isCertificate()) {
-                        credentials = new ApnsCredentials(credentialsFile);
+                if (credentialsFileAndPassword != null) {
+                    if (credentialsFileAndPassword.getValue() != null) {
+                        credentials = new ApnsCredentials(credentialsFileAndPassword.getKey(), credentialsFileAndPassword.getValue());
                     } else {
                         final String keyId = ComposeNotificationController.this.keyIdComboBox.getValue();
                         final String teamId = ComposeNotificationController.this.teamIdComboBox.getValue();
@@ -267,7 +277,7 @@ public class ComposeNotificationController {
                         final boolean hasKeyId = StringUtils.isNotBlank(keyId);
                         final boolean hasTeamId = StringUtils.isNotBlank(teamId);
 
-                        credentials = (hasKeyId && hasTeamId) ? new ApnsCredentials(credentialsFile, keyId, teamId) : null;
+                        credentials = (hasKeyId && hasTeamId) ? new ApnsCredentials(credentialsFileAndPassword.getKey(), keyId, teamId) : null;
                     }
                 } else {
                     credentials = null;
@@ -358,7 +368,7 @@ public class ComposeNotificationController {
             try {
                 ApnsSigningKey.loadFromPkcs8File(file, "temp", "temp");
 
-                this.apnsCredentialsFileProperty.set(new ApnsCredentialsFile(file));
+                this.credentialsFileAndPasswordProperty.set(new Pair<>(file, null));
 
                 final Matcher matcher = APNS_SIGNING_KEY_WITH_ID_PATTERN.matcher(file.getName());
 
@@ -391,8 +401,12 @@ public class ComposeNotificationController {
 
                 verifiedPassword.ifPresent(password -> {
                     try {
-                        this.apnsCredentialsFileProperty.set(new ApnsCredentialsFile(file, password));
-                    } catch (final CertificateException e1) {
+                        if (CertificateUtil.extractApnsTopicsFromCertificate(file, password).isEmpty()) {
+                            throw new CertificateException("Certificate does not name any APNs topics.");
+                        }
+
+                        this.credentialsFileAndPasswordProperty.set(new Pair<>(file, password));
+                    } catch (final IOException | KeyStoreException | CertificateException e1) {
                         final Alert alert = new Alert(Alert.AlertType.WARNING);
 
                         alert.setTitle(this.resources.getString("alert.bad-certificate.title"));
@@ -400,10 +414,6 @@ public class ComposeNotificationController {
                         alert.setContentText(this.resources.getString("alert.bad-certificate.content-text"));
 
                         alert.show();
-                    } catch (final KeyStoreException | IOException e1) {
-                        // This should never happen in practice since we checked the keystore as a means to verify the
-                        // password earlier.
-                        throw new RuntimeException(e1);
                     }
                 });
             }
