@@ -1,7 +1,6 @@
 package com.turo.pushy.console;
 
 import com.turo.pushy.apns.*;
-import com.turo.pushy.apns.auth.ApnsSigningKey;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -124,12 +123,10 @@ public class PushyConsoleController {
                     final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder();
                     apnsClientBuilder.setApnsServer(server, port);
 
-                    if (credentials.isCertificate()) {
-                        apnsClientBuilder.setClientCredentials(credentials.getCredentialsFile(), credentials.getCertificatePassword());
-                    } else {
-                        apnsClientBuilder.setSigningKey(ApnsSigningKey.loadFromPkcs8File(
-                                credentials.getCredentialsFile(), credentials.getTeamId(), credentials.getKeyId()));
-                    }
+                    credentials.getCertificateAndPrivateKey().ifPresent(certificateAndPrivateKey ->
+                            apnsClientBuilder.setClientCredentials(certificateAndPrivateKey.getKey(), certificateAndPrivateKey.getValue(), null));
+
+                    credentials.getSigningKey().ifPresent(apnsClientBuilder::setSigningKey);
 
                     final ApnsClient apnsClient = apnsClientBuilder.build();
 
