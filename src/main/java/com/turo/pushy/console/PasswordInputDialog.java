@@ -39,7 +39,7 @@ class PasswordInputDialog extends Dialog<String> {
         this.label = createLabel(dialogPane.getContentText());
         this.label.textProperty().bind(dialogPane.contentTextProperty());
 
-        this.incorrectPasswordLabel = createLabel(PushyConsoleResources.getResourceBundle().getString("password-dialog.incorrect-password"));
+        this.incorrectPasswordLabel = createLabel(PushyConsoleApplication.RESOURCE_BUNDLE.getString("password-dialog.incorrect-password"));
         this.incorrectPasswordLabel.setVisible(false);
         this.incorrectPasswordLabel.textProperty().addListener(o -> updateGrid());
 

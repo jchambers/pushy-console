@@ -108,7 +108,7 @@ public class PushyConsoleController {
         final Scene scene = ((Node) event.getSource()).getScene();
 
         if (this.readyToSendProperty.get()) {
-            scene.getStylesheets().remove(PushyConsoleResources.HIGHLIGHT_EMPTY_FIELDS_STYLESHEET);
+            scene.getStylesheets().remove(PushyConsoleApplication.HIGHLIGHT_EMPTY_FIELDS_STYLESHEET);
 
             this.composeNotificationController.handleNotificationSent();
 
@@ -147,7 +147,7 @@ public class PushyConsoleController {
 
             this.sendNotificationExecutorService.execute(sendNotificationTask);
         } else {
-            scene.getStylesheets().add(PushyConsoleResources.HIGHLIGHT_EMPTY_FIELDS_STYLESHEET);
+            scene.getStylesheets().add(PushyConsoleApplication.HIGHLIGHT_EMPTY_FIELDS_STYLESHEET);
         }
     }
 

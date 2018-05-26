@@ -12,7 +12,7 @@ class DeliveryPriorityListCell extends ListCell<DeliveryPriority> {
         super.updateItem(deliveryPriority, empty);
 
         if (!empty) {
-            final ResourceBundle resourceBundle = PushyConsoleResources.getResourceBundle();
+            final ResourceBundle resourceBundle = PushyConsoleApplication.RESOURCE_BUNDLE;
 
             setText(deliveryPriority == DeliveryPriority.IMMEDIATE ?
                     resourceBundle.getString("delivery-priority.immediate") :
