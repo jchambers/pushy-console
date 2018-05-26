@@ -269,7 +269,12 @@ public class ComposeNotificationController {
 
                 if (credentialsFileAndPassword != null) {
                     if (credentialsFileAndPassword.getValue() != null) {
-                        credentials = new ApnsCredentials(credentialsFileAndPassword.getKey(), credentialsFileAndPassword.getValue());
+                        try {
+                            credentials = new ApnsCredentials(credentialsFileAndPassword.getKey(), credentialsFileAndPassword.getValue());
+                        } catch (final IOException | KeyStoreException e) {
+                            // This should never happen because we checked the certificate when it was first selected
+                            throw new RuntimeException(e);
+                        }
                     } else {
                         final String keyId = ComposeNotificationController.this.keyIdComboBox.getValue();
                         final String teamId = ComposeNotificationController.this.teamIdComboBox.getValue();
@@ -277,7 +282,12 @@ public class ComposeNotificationController {
                         final boolean hasKeyId = StringUtils.isNotBlank(keyId);
                         final boolean hasTeamId = StringUtils.isNotBlank(teamId);
 
-                        credentials = (hasKeyId && hasTeamId) ? new ApnsCredentials(credentialsFileAndPassword.getKey(), keyId, teamId) : null;
+                        try {
+                            credentials = (hasKeyId && hasTeamId) ? new ApnsCredentials(credentialsFileAndPassword.getKey(), keyId, teamId) : null;
+                        } catch (final NoSuchAlgorithmException | InvalidKeyException | IOException e) {
+                            // This should never happen because we checked the signing key when it was first selected
+                            throw new RuntimeException(e);
+                        }
                     }
                 } else {
                     credentials = null;
