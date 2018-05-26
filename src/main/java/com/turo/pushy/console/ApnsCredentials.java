@@ -2,34 +2,31 @@ package com.turo.pushy.console;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.util.Objects;
 
 public class ApnsCredentials {
 
-    private final ApnsCredentialsFile credentialsFile;
+    private final File credentialsFile;
+
+    private final String certificatePassword;
 
     private final String keyId;
     private final String teamId;
 
-    public ApnsCredentials(final ApnsCredentialsFile certificateFile) {
+    public ApnsCredentials(final File certificateFile, final String certificatePassword) {
         Objects.requireNonNull(certificateFile, "Certificate file must not be null.");
-
-        if (!certificateFile.isCertificate()) {
-            throw new IllegalArgumentException("Credentials file is not a certificate; use the signing key constructor instead.");
-        }
+        Objects.requireNonNull(certificatePassword, "Certificate password may be blank, but must not be null.");
 
         this.credentialsFile = certificateFile;
+        this.certificatePassword = certificatePassword;
 
         this.keyId = null;
         this.teamId = null;
     }
 
-    public ApnsCredentials(final ApnsCredentialsFile signingKeyFile, final String keyId, final String teamId) {
+    public ApnsCredentials(final File signingKeyFile, final String keyId, final String teamId) {
         Objects.requireNonNull(signingKeyFile, "Signing key file must not be null.");
-
-        if (!signingKeyFile.isSigningKey()) {
-            throw new IllegalArgumentException("Credentials file is not a signing key; use certificate constructor instead.");
-        }
 
         if (StringUtils.isBlank(keyId)) {
             throw new IllegalArgumentException("Key ID must not be blank.");
@@ -43,10 +40,16 @@ public class ApnsCredentials {
 
         this.keyId = keyId;
         this.teamId = teamId;
+
+        this.certificatePassword = null;
     }
 
-    public ApnsCredentialsFile getCredentialsFile() {
+    public File getCredentialsFile() {
         return credentialsFile;
+    }
+
+    public String getCertificatePassword() {
+        return certificatePassword;
     }
 
     public String getKeyId() {
@@ -55,5 +58,9 @@ public class ApnsCredentials {
 
     public String getTeamId() {
         return teamId;
+    }
+
+    public boolean isCertificate() {
+        return certificatePassword != null;
     }
 }
