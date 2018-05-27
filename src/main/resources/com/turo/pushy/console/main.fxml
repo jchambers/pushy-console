@@ -25,6 +25,7 @@
                   <TableColumn fx:id="notificationResultTopicColumn" editable="false" prefWidth="100.0" sortable="false" text="%fxml.topic.label" />
                   <TableColumn fx:id="notificationResultTokenColumn" editable="false" prefWidth="100.0" sortable="false" text="%fxml.token.label" />
                   <TableColumn fx:id="notificationResultPayloadColumn" editable="false" prefWidth="100.0" sortable="false" text="%fxml.payload.label" />
+                  <TableColumn fx:id="notificationResultCollapseIdColumn" editable="false" prefWidth="100.0" sortable="false" text="%fxml.collapse-id.label" />
                   <TableColumn fx:id="notificationResultPriorityColumn" editable="false" prefWidth="100.0" sortable="false" text="%fxml.priority.label" />
                </columns></TableColumn>
           <TableColumn prefWidth="-1.0" text="%fxml.response.label">

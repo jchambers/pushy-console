@@ -8,10 +8,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -36,6 +33,7 @@ public class PushyConsoleController {
     @FXML private TableColumn<PushNotificationResponse<ApnsPushNotification>, String> notificationResultTopicColumn;
     @FXML private TableColumn<PushNotificationResponse<ApnsPushNotification>, String> notificationResultTokenColumn;
     @FXML private TableColumn<PushNotificationResponse<ApnsPushNotification>, String> notificationResultPayloadColumn;
+    @FXML private TableColumn<PushNotificationResponse<ApnsPushNotification>, String> notificationResultCollapseIdColumn;
     @FXML private TableColumn<PushNotificationResponse<ApnsPushNotification>, String> notificationResultPriorityColumn;
 
     @FXML private TableColumn<PushNotificationResponse<ApnsPushNotification>, String> notificationResultStatusColumn;
@@ -60,6 +58,9 @@ public class PushyConsoleController {
                 new ReadOnlyStringWrapper(cellDataFeatures.getValue().getPushNotification().getPayload()
                         .replace('\n', ' ')
                         .replaceAll("\\s+", " ")));
+
+        notificationResultCollapseIdColumn.setCellValueFactory(cellDataFeatures ->
+                new ReadOnlyStringWrapper(cellDataFeatures.getValue().getPushNotification().getCollapseId()));
 
         notificationResultPriorityColumn.setCellValueFactory(cellDataFeatures -> new ReadOnlyStringWrapper(
                 cellDataFeatures.getValue().getPushNotification().getPriority() == DeliveryPriority.IMMEDIATE ?
