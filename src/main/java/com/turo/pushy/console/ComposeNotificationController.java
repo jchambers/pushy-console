@@ -41,8 +41,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * A controller for the area of the area of the main window where users enter connection settings and notification
- * details.
+ * A controller for the area of the area of the main window where users enter connection settings, APNs credentials,
+ * and notification details.
  *
  * @author <a href="https://github.com/jchambers/">Jon Chambers</a>
  */
@@ -97,6 +97,9 @@ public class ComposeNotificationController {
 
     private static final PseudoClass BLANK_PSEUDO_CLASS = PseudoClass.getPseudoClass("blank");
 
+    /**
+     * Initializes the controller and its various controls and bindings.
+     */
     public void initialize() {
         final Preferences preferences = Preferences.userNodeForPackage(getClass());
 
@@ -363,7 +366,7 @@ public class ComposeNotificationController {
     }
 
     @FXML
-    protected void handleBrowseButtonAction(final ActionEvent event) {
+    private void handleBrowseButtonAction(final ActionEvent event) {
         final FileChooser fileChooser = new FileChooser();
 
         fileChooser.getExtensionFilters().addAll(
@@ -430,7 +433,10 @@ public class ComposeNotificationController {
         }
     }
 
-    void handleNotificationSent() {
+    /**
+     * Handles a successful attempt to send a push notification.
+     */
+    public void handleNotificationSent() {
         final Preferences preferences = Preferences.userNodeForPackage(getClass());
 
         preferences.put(MOST_RECENT_SERVER_KEY, apnsServerComboBox.getValue());
@@ -487,18 +493,91 @@ public class ComposeNotificationController {
         comboBox.setValue(currentValue);
     }
 
+    /**
+     * Returns the currently-selected APNs server.
+     *
+     * @return the currently-selected APNs server
+     *
+     * @see com.turo.pushy.apns.ApnsClientBuilder#PRODUCTION_APNS_HOST
+     * @see com.turo.pushy.apns.ApnsClientBuilder#DEVELOPMENT_APNS_HOST
+     */
+    public final String getApnsServer() {
+        return apnsServerWrapper.get();
+    }
+
+    /**
+     * Returns the property representing the currently-selected APNs server.
+     *
+     * @return the property representing the currently-selected APNs server
+     *
+     * @see #getApnsServer()
+     */
     public ReadOnlyStringProperty apnsServerProperty() {
         return apnsServerWrapper.getReadOnlyProperty();
     }
 
+    /**
+     * Returns the currently-selected APNs port.
+     *
+     * @return the currently-selected APNs port
+     *
+     * @see com.turo.pushy.apns.ApnsClientBuilder#DEFAULT_APNS_PORT
+     * @see com.turo.pushy.apns.ApnsClientBuilder#ALTERNATE_APNS_PORT
+     */
+    public final int getApnsPort() {
+        return apnsPortWrapper.get();
+    }
+
+    /**
+     * Returns the property representing the currently-selected APNs port.
+     *
+     * @return the property representing the currently-selected APNs port
+     *
+     * @see #getApnsPort()
+     */
     public ReadOnlyIntegerProperty apnsPortProperty() {
         return apnsPortWrapper.getReadOnlyProperty();
     }
 
+    /**
+     * Returns the user-selected APNs credentials.
+     *
+     * @return the user-selected APNs credentials, or an empty {@code Optional} if the credentials are either missing or
+     * incomplete
+     */
+    public final Optional<ApnsCredentials> getApnsCredentials() {
+        return Optional.ofNullable(apnsCredentialsWrapper.get());
+    }
+
+    /**
+     * Returns the property representing the user-selected APNs credentials.
+     *
+     * @return the property representing the user-selected APNs credentials
+     *
+     * @see #getApnsCredentials()
+     */
     public ReadOnlyObjectProperty<ApnsCredentials> apnsCredentialsProperty() {
         return apnsCredentialsWrapper.getReadOnlyProperty();
     }
 
+    /**
+     * Returns the push notification composed by the user. The composed push notification encompasses a topic,
+     * destination device token, an optional "collapse ID," a delivery priority, and a payload.
+     *
+     * @return the push notification composed by the user, or an empty {@code Optional} if the user hasn't provided
+     * values for all required fields
+     */
+    public final Optional<ApnsPushNotification> getPushNotification() {
+        return Optional.ofNullable(pushNotificationWrapper.get());
+    }
+
+    /**
+     * Returns the property representing the user-composed push notification.
+     *
+     * @return the property representing the user-composed push notification
+     *
+     * @see #getPushNotification()
+     */
     public ReadOnlyObjectProperty<ApnsPushNotification> pushNotificationProperty() {
         return pushNotificationWrapper.getReadOnlyProperty();
     }

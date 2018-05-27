@@ -42,6 +42,20 @@
                     <target>8</target>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <configuration>
+                    <overview>${basedir}/src/main/java/overview.html</overview>
+                    <show>public</show>
+                    <links>
+                        <link>https://docs.oracle.com/javase/8/javafx/api/</link>
+                        <link>http://relayrides.github.io/pushy/apidocs/0.13/</link>
+                    </links>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
