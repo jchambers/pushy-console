@@ -95,7 +95,7 @@ public class ComposeNotificationController {
     private static final Pattern APNS_SIGNING_KEY_WITH_ID_PATTERN =
             Pattern.compile("^APNsAuthKey_([A-Z0-9]{10}).p8$", Pattern.CASE_INSENSITIVE);
 
-    private static final PseudoClass EMPTY_PSEUDO_CLASS = PseudoClass.getPseudoClass("empty");
+    private static final PseudoClass BLANK_PSEUDO_CLASS = PseudoClass.getPseudoClass("blank");
 
     public void initialize() {
         final Preferences preferences = Preferences.userNodeForPackage(getClass());
@@ -337,12 +337,12 @@ public class ComposeNotificationController {
                 final boolean newValueBlank = StringUtils.isBlank(newValue);
 
                 if (oldValueBlank != newValueBlank) {
-                    comboBox.pseudoClassStateChanged(EMPTY_PSEUDO_CLASS, newValueBlank);
+                    comboBox.pseudoClassStateChanged(BLANK_PSEUDO_CLASS, newValueBlank);
                 }
             });
 
             // Also set the psuedo class immediately based on the control's current state
-            comboBox.pseudoClassStateChanged(EMPTY_PSEUDO_CLASS, StringUtils.isBlank(comboBox.getValue()));
+            comboBox.pseudoClassStateChanged(BLANK_PSEUDO_CLASS, StringUtils.isBlank(comboBox.getValue()));
         }
     }
 
@@ -353,12 +353,12 @@ public class ComposeNotificationController {
                 final boolean newValueBlank = StringUtils.isBlank(newValue);
 
                 if (oldValueBlank != newValueBlank) {
-                    textInputControl.pseudoClassStateChanged(EMPTY_PSEUDO_CLASS, newValueBlank);
+                    textInputControl.pseudoClassStateChanged(BLANK_PSEUDO_CLASS, newValueBlank);
                 }
             });
 
             // Also set the psuedo class immediately based on the control's current state
-            textInputControl.pseudoClassStateChanged(EMPTY_PSEUDO_CLASS, StringUtils.isBlank(textInputControl.getText()));
+            textInputControl.pseudoClassStateChanged(BLANK_PSEUDO_CLASS, StringUtils.isBlank(textInputControl.getText()));
         }
     }
 

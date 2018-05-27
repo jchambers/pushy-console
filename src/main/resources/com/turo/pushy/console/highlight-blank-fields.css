@@ -1,17 +1,17 @@
-.text-field:empty, .text-area:empty {
+.text-field:blank, .text-area:blank {
     -fx-text-box-border: #DF4A32;
 }
 
-.text-field:empty:focused, .text-area:empty:focused {
+.text-field:blank:focused, .text-area:blank:focused {
     -fx-text-box-border: inherit;
 }
 
-.combo-box-base:empty {
+.combo-box-base:blank {
     -fx-border-color: #DF4A32;
     -fx-border-radius: 4;
 }
 
-.combo-box-base:empty:disabled, .combo-box-base:empty:focused {
+.combo-box-base:blank:disabled, .combo-box-base:blank:focused {
     -fx-border-color: inherit;
     -fx-border-radius: inherit;
 }

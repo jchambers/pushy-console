@@ -56,7 +56,7 @@ public class PushyConsoleApplication extends Application {
     });
 
     public static final String HIGHLIGHT_EMPTY_FIELDS_STYLESHEET =
-            PushyConsoleApplication.class.getResource("highlight-empty-fields.css").toExternalForm();
+            PushyConsoleApplication.class.getResource("highlight-blank-fields.css").toExternalForm();
 
     public static void main(final String... args) {
         launch(args);
