@@ -48,6 +48,8 @@ public class PushyConsoleController {
      * Initializes the controller and its various controls and bindings.
      */
     public void initialize() {
+        notificationResultTableView.setPlaceholder(new Label(resources.getString("notification-result.placeholder")));
+
         notificationResultTopicColumn.setCellValueFactory(cellDataFeatures ->
                 new ReadOnlyStringWrapper(cellDataFeatures.getValue().getPushNotification().getTopic()));
 
