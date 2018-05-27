@@ -20,6 +20,7 @@ import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.util.Pair;
@@ -77,6 +78,8 @@ public class ComposeNotificationController {
     private final ListProperty<String> recentTopicsProperty = new SimpleListProperty<>();
     private final ObservableList<String> recentPayloads = FXCollections.observableArrayList();
 
+    private final BooleanProperty requiredFieldGroupHighlightedProperty = new SimpleBooleanProperty();
+
     private static final String MOST_RECENT_SERVER_KEY = "mostRecentServer";
     private static final String MOST_RECENT_PORT_KEY = "mostRecentPort";
     private static final String MOST_RECENT_DELIVERY_PRIORITY_KEY = "mostRecentDeliveryPriority";
@@ -96,6 +99,9 @@ public class ComposeNotificationController {
             Pattern.compile("^APNsAuthKey_([A-Z0-9]{10}).p8$", Pattern.CASE_INSENSITIVE);
 
     private static final PseudoClass BLANK_PSEUDO_CLASS = PseudoClass.getPseudoClass("blank");
+
+    private static final String HIGHLIGHT_EMPTY_FIELDS_STYLESHEET =
+            ComposeNotificationController.class.getResource("highlight-blank-fields.css").toExternalForm();
 
     /**
      * Initializes the controller and its various controls and bindings.
@@ -253,6 +259,17 @@ public class ComposeNotificationController {
 
         addEmptyPseudoClassListener(keyIdComboBox, teamIdComboBox, topicComboBox, deviceTokenComboBox);
         addEmptyPseudoClassListener(apnsCredentialFileTextField, payloadTextArea);
+
+        requiredFieldGroupHighlightedProperty.addListener((observable, oldValue, newValue) -> {
+            // We can get the scene from any node; there's nothing special about the server combo box.
+            final Scene scene = apnsServerComboBox.getScene();
+
+            if (newValue) {
+                scene.getStylesheets().add(HIGHLIGHT_EMPTY_FIELDS_STYLESHEET);
+            } else {
+                scene.getStylesheets().remove(HIGHLIGHT_EMPTY_FIELDS_STYLESHEET);
+            }
+        });
 
         apnsServerWrapper.bind(apnsServerComboBox.valueProperty());
         apnsPortWrapper.bind(apnsPortComboBox.valueProperty());
@@ -437,6 +454,8 @@ public class ComposeNotificationController {
      * Handles a successful attempt to send a push notification.
      */
     public void handleNotificationSent() {
+        setRequiredFieldGroupHighlighted(false);
+
         final Preferences preferences = Preferences.userNodeForPackage(getClass());
 
         preferences.put(MOST_RECENT_SERVER_KEY, apnsServerComboBox.getValue());
@@ -580,5 +599,36 @@ public class ComposeNotificationController {
      */
     public ReadOnlyObjectProperty<ApnsPushNotification> pushNotificationProperty() {
         return pushNotificationWrapper.getReadOnlyProperty();
+    }
+
+    /**
+     * Sets whether fields that must be populated before sending a push notification should be highlighted.
+     *
+     * @param highlighted {@code true} if fields that must be populated before sending a push notification should be
+     * highlighted or {@code false} otherwise
+     */
+    public final void setRequiredFieldGroupHighlighted(final boolean highlighted) {
+        requiredFieldGroupHighlightedProperty.setValue(highlighted);
+    }
+
+    /**
+     * Indicates whether fields that must be populated before sending a push notification are highlighted.
+     *
+     * @return {@code true} if fields that must be populated before sending a push notification are currently
+     * highlighted or {@code false} otherwise
+     */
+    public final boolean isRequiredFieldGroupHighlighted() {
+        return requiredFieldGroupHighlightedProperty.get();
+    }
+
+    /**
+     * Returns the property representing whether fields that must be populated before sending a push notification are
+     * highlighted.
+     *
+     * @return the property representing whether fields that must be populated before sending a push notification are
+     * highlighted
+     */
+    public BooleanProperty requiredFieldGroupHighlightedProperty() {
+        return requiredFieldGroupHighlightedProperty;
     }
 }

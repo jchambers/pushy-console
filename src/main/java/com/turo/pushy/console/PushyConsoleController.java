@@ -8,8 +8,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -105,11 +103,7 @@ public class PushyConsoleController {
 
     @FXML
     protected void handleSendNotificationButtonAction(final ActionEvent event) {
-        final Scene scene = ((Node) event.getSource()).getScene();
-
         if (readyToSendProperty.get()) {
-            scene.getStylesheets().remove(PushyConsoleApplication.HIGHLIGHT_EMPTY_FIELDS_STYLESHEET);
-
             composeNotificationController.handleNotificationSent();
 
             final Task<PushNotificationResponse<ApnsPushNotification>> sendNotificationTask = new Task<PushNotificationResponse<ApnsPushNotification>>() {
@@ -146,7 +140,7 @@ public class PushyConsoleController {
 
             sendNotificationExecutorService.execute(sendNotificationTask);
         } else {
-            scene.getStylesheets().add(PushyConsoleApplication.HIGHLIGHT_EMPTY_FIELDS_STYLESHEET);
+            composeNotificationController.setRequiredFieldGroupHighlighted(true);
         }
     }
 
