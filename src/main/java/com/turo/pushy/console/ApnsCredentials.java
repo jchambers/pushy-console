@@ -39,8 +39,8 @@ public class ApnsCredentials {
         final KeyStore.PrivateKeyEntry privateKeyEntry =
                 CertificateUtil.getFirstPrivateKeyEntry(certificateFile, certificatePassword);
 
-        this.certificateAndPrivateKey = new Pair<>((X509Certificate) privateKeyEntry.getCertificate(), privateKeyEntry.getPrivateKey());
-        this.signingKey = null;
+        certificateAndPrivateKey = new Pair<>((X509Certificate) privateKeyEntry.getCertificate(), privateKeyEntry.getPrivateKey());
+        signingKey = null;
     }
 
     /**
@@ -65,8 +65,8 @@ public class ApnsCredentials {
             throw new IllegalArgumentException("Team ID must not be blank.");
         }
 
-        this.signingKey = ApnsSigningKey.loadFromPkcs8File(signingKeyFile, teamId, keyId);
-        this.certificateAndPrivateKey = null;
+        signingKey = ApnsSigningKey.loadFromPkcs8File(signingKeyFile, teamId, keyId);
+        certificateAndPrivateKey = null;
     }
 
     /**

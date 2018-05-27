@@ -100,51 +100,51 @@ public class ComposeNotificationController {
     public void initialize() {
         final Preferences preferences = Preferences.userNodeForPackage(getClass());
 
-        this.apnsServerComboBox.setItems(FXCollections.observableArrayList(
+        apnsServerComboBox.setItems(FXCollections.observableArrayList(
                 ApnsClientBuilder.PRODUCTION_APNS_HOST,
                 ApnsClientBuilder.DEVELOPMENT_APNS_HOST));
 
-        this.apnsServerComboBox.setValue(preferences.get(MOST_RECENT_SERVER_KEY, ApnsClientBuilder.PRODUCTION_APNS_HOST));
+        apnsServerComboBox.setValue(preferences.get(MOST_RECENT_SERVER_KEY, ApnsClientBuilder.PRODUCTION_APNS_HOST));
 
-        this.apnsPortComboBox.setItems(FXCollections.observableArrayList(
+        apnsPortComboBox.setItems(FXCollections.observableArrayList(
                 ApnsClientBuilder.DEFAULT_APNS_PORT,
                 ApnsClientBuilder.ALTERNATE_APNS_PORT));
 
-        this.apnsPortComboBox.setValue(preferences.getInt(MOST_RECENT_PORT_KEY, ApnsClientBuilder.DEFAULT_APNS_PORT));
+        apnsPortComboBox.setValue(preferences.getInt(MOST_RECENT_PORT_KEY, ApnsClientBuilder.DEFAULT_APNS_PORT));
 
-        this.apnsCredentialFileTextField.textProperty().bind(new StringBinding() {
+        apnsCredentialFileTextField.textProperty().bind(new StringBinding() {
             {
-                super.bind(ComposeNotificationController.this.credentialsFileAndPasswordProperty);
+                super.bind(credentialsFileAndPasswordProperty);
             }
 
             @Override
             protected String computeValue() {
-                final Pair<File, String> credentialsFileAndPassword = ComposeNotificationController.this.credentialsFileAndPasswordProperty.get();
+                final Pair<File, String> credentialsFileAndPassword = credentialsFileAndPasswordProperty.get();
                 return credentialsFileAndPassword != null ? credentialsFileAndPassword.getKey().getAbsolutePath() : null;
             }
         });
 
-        this.deliveryPriorityComboBox.setCellFactory(listView -> new DeliveryPriorityListCell());
-        this.deliveryPriorityComboBox.setButtonCell(new DeliveryPriorityListCell());
+        deliveryPriorityComboBox.setCellFactory(listView -> new DeliveryPriorityListCell());
+        deliveryPriorityComboBox.setButtonCell(new DeliveryPriorityListCell());
 
-        this.deliveryPriorityComboBox.setItems(FXCollections.observableArrayList(
+        deliveryPriorityComboBox.setItems(FXCollections.observableArrayList(
                 DeliveryPriority.IMMEDIATE,
                 DeliveryPriority.CONSERVE_POWER
         ));
 
         try {
-            this.deliveryPriorityComboBox.setValue(DeliveryPriority.valueOf(preferences.get(MOST_RECENT_DELIVERY_PRIORITY_KEY, DeliveryPriority.IMMEDIATE.name())));
+            deliveryPriorityComboBox.setValue(DeliveryPriority.valueOf(preferences.get(MOST_RECENT_DELIVERY_PRIORITY_KEY, DeliveryPriority.IMMEDIATE.name())));
         } catch (final IllegalArgumentException e) {
-            this.deliveryPriorityComboBox.setValue(DeliveryPriority.IMMEDIATE);
+            deliveryPriorityComboBox.setValue(DeliveryPriority.IMMEDIATE);
         }
 
-        this.recentTopicsProperty.set(FXCollections.observableArrayList(loadPreferencesList(RECENT_TOPICS_KEY)));
-        this.recentTopicsProperty.addListener((ListChangeListener<String>) change ->
+        recentTopicsProperty.set(FXCollections.observableArrayList(loadPreferencesList(RECENT_TOPICS_KEY)));
+        recentTopicsProperty.addListener((ListChangeListener<String>) change ->
                 savePreferencesList(RECENT_TOPICS_KEY, change.getList()));
 
-        this.topicComboBox.itemsProperty().bind(this.recentTopicsProperty);
+        topicComboBox.itemsProperty().bind(recentTopicsProperty);
 
-        this.credentialsFileAndPasswordProperty.addListener((observable, oldValue, newValue) -> {
+        credentialsFileAndPasswordProperty.addListener((observable, oldValue, newValue) -> {
             // If we have a password, we're dealing with a certificate
             if (newValue != null && newValue.getValue() != null) {
 
@@ -154,93 +154,93 @@ public class ComposeNotificationController {
 
                     // When working with certificates, we'll always have a fixed list of topics from the certificate and
                     // should not allow freeform editing.
-                    this.topicComboBox.setEditable(false);
+                    topicComboBox.setEditable(false);
 
-                    this.topicComboBox.itemsProperty().unbind();
-                    this.topicComboBox.setItems(FXCollections.observableArrayList(topics));
+                    topicComboBox.itemsProperty().unbind();
+                    topicComboBox.setItems(FXCollections.observableArrayList(topics));
 
-                    if (!this.topicComboBox.getItems().contains(this.topicComboBox.getValue())) {
-                        this.topicComboBox.setValue(this.topicComboBox.getItems().get(0));
+                    if (!topicComboBox.getItems().contains(topicComboBox.getValue())) {
+                        topicComboBox.setValue(topicComboBox.getItems().get(0));
                     }
                 } catch (final KeyStoreException | IOException e) {
                     // This should never happen since we checked the certificate when it was first selected
                     throw new RuntimeException(e);
                 }
             } else {
-                this.topicComboBox.setEditable(true);
-                this.topicComboBox.itemsProperty().bind(this.recentTopicsProperty);
+                topicComboBox.setEditable(true);
+                topicComboBox.itemsProperty().bind(recentTopicsProperty);
             }
         });
 
         final BooleanBinding credentialsFileIsCertificateBinding = new BooleanBinding() {
             {
-                super.bind(ComposeNotificationController.this.credentialsFileAndPasswordProperty);
+                super.bind(credentialsFileAndPasswordProperty);
             }
 
             @Override
             protected boolean computeValue() {
-                final Pair<File, String> credentialsFileAndPassword = ComposeNotificationController.this.credentialsFileAndPasswordProperty.get();
+                final Pair<File, String> credentialsFileAndPassword = credentialsFileAndPasswordProperty.get();
                 return credentialsFileAndPassword != null && credentialsFileAndPassword.getValue() != null;
             }
         };
 
-        this.keyIdLabel.disableProperty().bind(this.keyIdComboBox.disabledProperty());
+        keyIdLabel.disableProperty().bind(keyIdComboBox.disabledProperty());
 
-        this.keyIdComboBox.disableProperty().bind(credentialsFileIsCertificateBinding);
-        this.keyIdComboBox.disabledProperty().addListener((observable, oldValue, newValue) -> {
+        keyIdComboBox.disableProperty().bind(credentialsFileIsCertificateBinding);
+        keyIdComboBox.disabledProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
-                this.keyIdComboBox.setValue(null);
+                keyIdComboBox.setValue(null);
             }
         });
 
-        this.keyIdComboBox.setItems(FXCollections.observableArrayList(loadPreferencesList(RECENT_KEY_IDS_KEY)));
-        this.keyIdComboBox.getItems().addListener((ListChangeListener<String>) change ->
+        keyIdComboBox.setItems(FXCollections.observableArrayList(loadPreferencesList(RECENT_KEY_IDS_KEY)));
+        keyIdComboBox.getItems().addListener((ListChangeListener<String>) change ->
                 savePreferencesList(RECENT_KEY_IDS_KEY, change.getList()));
 
-        this.teamIdLabel.disableProperty().bind(this.teamIdComboBox.disabledProperty());
+        teamIdLabel.disableProperty().bind(teamIdComboBox.disabledProperty());
 
-        this.teamIdComboBox.disableProperty().bind(credentialsFileIsCertificateBinding);
-        this.teamIdComboBox.disabledProperty().addListener((observable, oldValue, newValue) -> {
+        teamIdComboBox.disableProperty().bind(credentialsFileIsCertificateBinding);
+        teamIdComboBox.disabledProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
-                this.teamIdComboBox.setValue(null);
+                teamIdComboBox.setValue(null);
             }
         });
 
-        this.teamIdComboBox.setItems(FXCollections.observableArrayList(loadPreferencesList(RECENT_TEAM_IDS_KEY)));
-        this.teamIdComboBox.getItems().addListener((ListChangeListener<String>) change ->
+        teamIdComboBox.setItems(FXCollections.observableArrayList(loadPreferencesList(RECENT_TEAM_IDS_KEY)));
+        teamIdComboBox.getItems().addListener((ListChangeListener<String>) change ->
                 savePreferencesList(RECENT_TEAM_IDS_KEY, change.getList()));
 
-        this.deviceTokenComboBox.setItems(FXCollections.observableArrayList(loadPreferencesList(RECENT_TOKENS_KEY)));
-        this.deviceTokenComboBox.getItems().addListener((ListChangeListener<String>) change ->
+        deviceTokenComboBox.setItems(FXCollections.observableArrayList(loadPreferencesList(RECENT_TOKENS_KEY)));
+        deviceTokenComboBox.getItems().addListener((ListChangeListener<String>) change ->
                 savePreferencesList(RECENT_TOKENS_KEY, change.getList()));
 
-        this.collapseIdComboBox.setItems(FXCollections.observableArrayList(loadPreferencesList(RECENT_COLLAPSE_IDS_KEY)));
-        this.collapseIdComboBox.getItems().addListener((ListChangeListener<String>) change ->
+        collapseIdComboBox.setItems(FXCollections.observableArrayList(loadPreferencesList(RECENT_COLLAPSE_IDS_KEY)));
+        collapseIdComboBox.getItems().addListener((ListChangeListener<String>) change ->
                 savePreferencesList(RECENT_COLLAPSE_IDS_KEY, change.getList()));
 
-        this.recentPayloads.addListener((ListChangeListener<String>) change -> {
-            this.recentPayloadsMenuButton.getItems().clear();
+        recentPayloads.addListener((ListChangeListener<String>) change -> {
+            recentPayloadsMenuButton.getItems().clear();
 
-            this.recentPayloadsMenuButton.getItems().addAll(change.getList().stream().map(payload -> {
+            recentPayloadsMenuButton.getItems().addAll(change.getList().stream().map(payload -> {
                 final String smooshedPayload = payload.replaceAll("\\s+", " ");
                 final MenuItem menuItem = new MenuItem(smooshedPayload);
 
-                menuItem.setOnAction(event -> this.payloadTextArea.setText(this.payloadTextArea.getText() + payload));
+                menuItem.setOnAction(event -> payloadTextArea.setText(payloadTextArea.getText() + payload));
 
                 return menuItem;
             }).collect(Collectors.toList()));
 
-            this.recentPayloadsMenuButton.setDisable(change.getList().isEmpty());
+            recentPayloadsMenuButton.setDisable(change.getList().isEmpty());
         });
 
-        this.recentPayloads.addAll(loadPreferencesList(RECENT_PAYLOADS_KEY));
+        recentPayloads.addAll(loadPreferencesList(RECENT_PAYLOADS_KEY));
 
-        this.recentPayloads.addListener((ListChangeListener<String>) change -> {
-            int end = this.recentPayloads.size();
+        recentPayloads.addListener((ListChangeListener<String>) change -> {
+            int end = recentPayloads.size();
 
             while (end > 0) {
                 try {
-                    preferences.put(RECENT_PAYLOADS_KEY, GSON.toJson(this.recentPayloads.subList(0, end)));
+                    preferences.put(RECENT_PAYLOADS_KEY, GSON.toJson(recentPayloads.subList(0, end)));
                     break;
                 } catch (final IllegalArgumentException e) {
                     end -= 1;
@@ -248,24 +248,24 @@ public class ComposeNotificationController {
             }
         });
 
-        addEmptyPseudoClassListener(this.keyIdComboBox, this.teamIdComboBox, this.topicComboBox, this.deviceTokenComboBox);
-        addEmptyPseudoClassListener(this.apnsCredentialFileTextField, this.payloadTextArea);
+        addEmptyPseudoClassListener(keyIdComboBox, teamIdComboBox, topicComboBox, deviceTokenComboBox);
+        addEmptyPseudoClassListener(apnsCredentialFileTextField, payloadTextArea);
 
-        this.apnsServerWrapper.bind(this.apnsServerComboBox.valueProperty());
-        this.apnsPortWrapper.bind(this.apnsPortComboBox.valueProperty());
+        apnsServerWrapper.bind(apnsServerComboBox.valueProperty());
+        apnsPortWrapper.bind(apnsPortComboBox.valueProperty());
 
-        this.apnsCredentialsWrapper.bind(new ObjectBinding<ApnsCredentials>() {
+        apnsCredentialsWrapper.bind(new ObjectBinding<ApnsCredentials>() {
             {
-                super.bind(ComposeNotificationController.this.credentialsFileAndPasswordProperty,
-                        ComposeNotificationController.this.keyIdComboBox.valueProperty(),
-                        ComposeNotificationController.this.teamIdComboBox.valueProperty());
+                super.bind(credentialsFileAndPasswordProperty,
+                        keyIdComboBox.valueProperty(),
+                        teamIdComboBox.valueProperty());
             }
 
             @Override
             protected ApnsCredentials computeValue() {
                 final ApnsCredentials credentials;
 
-                final Pair<File, String> credentialsFileAndPassword = ComposeNotificationController.this.credentialsFileAndPasswordProperty.get();
+                final Pair<File, String> credentialsFileAndPassword = credentialsFileAndPasswordProperty.get();
 
                 if (credentialsFileAndPassword != null) {
                     if (credentialsFileAndPassword.getValue() != null) {
@@ -276,8 +276,8 @@ public class ComposeNotificationController {
                             throw new RuntimeException(e);
                         }
                     } else {
-                        final String keyId = ComposeNotificationController.this.keyIdComboBox.getValue();
-                        final String teamId = ComposeNotificationController.this.teamIdComboBox.getValue();
+                        final String keyId = keyIdComboBox.getValue();
+                        final String teamId = teamIdComboBox.getValue();
 
                         final boolean hasKeyId = StringUtils.isNotBlank(keyId);
                         final boolean hasTeamId = StringUtils.isNotBlank(teamId);
@@ -297,21 +297,21 @@ public class ComposeNotificationController {
             }
         });
 
-        this.pushNotificationWrapper.bind(new ObjectBinding<ApnsPushNotification>() {
+        pushNotificationWrapper.bind(new ObjectBinding<ApnsPushNotification>() {
             {
-                super.bind(ComposeNotificationController.this.deviceTokenComboBox.valueProperty(),
-                        ComposeNotificationController.this.topicComboBox.valueProperty(),
-                        ComposeNotificationController.this.payloadTextArea.textProperty(),
-                        ComposeNotificationController.this.deliveryPriorityComboBox.valueProperty(),
-                        ComposeNotificationController.this.collapseIdComboBox.valueProperty());
+                super.bind(deviceTokenComboBox.valueProperty(),
+                        topicComboBox.valueProperty(),
+                        payloadTextArea.textProperty(),
+                        deliveryPriorityComboBox.valueProperty(),
+                        collapseIdComboBox.valueProperty());
             }
             @Override
             protected ApnsPushNotification computeValue() {
-                final String deviceToken = ComposeNotificationController.this.deviceTokenComboBox.getValue();
-                final String topic = ComposeNotificationController.this.topicComboBox.getValue();
-                final String payload = ComposeNotificationController.this.payloadTextArea.getText();
-                final DeliveryPriority deliveryPriority = ComposeNotificationController.this.deliveryPriorityComboBox.getValue();
-                final String collapseId = ComposeNotificationController.this.collapseIdComboBox.getValue();
+                final String deviceToken = deviceTokenComboBox.getValue();
+                final String topic = topicComboBox.getValue();
+                final String payload = payloadTextArea.getText();
+                final DeliveryPriority deliveryPriority = deliveryPriorityComboBox.getValue();
+                final String collapseId = collapseIdComboBox.getValue();
 
                 final ApnsPushNotification pushNotification;
 
@@ -367,10 +367,10 @@ public class ComposeNotificationController {
         final FileChooser fileChooser = new FileChooser();
 
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter(this.resources.getString("certificate-chooser.filter.pkcs8_and_pkcs12"), "*.p8", "*.p12"),
-                new FileChooser.ExtensionFilter(this.resources.getString("certificate-chooser.filter.pkcs12"), "*.p12"),
-                new FileChooser.ExtensionFilter(this.resources.getString("certificate-chooser.filter.pkcs8"), "*.p8"),
-                new FileChooser.ExtensionFilter(this.resources.getString("certificate-chooser.filter.all"), "*.*"));
+                new FileChooser.ExtensionFilter(resources.getString("certificate-chooser.filter.pkcs8_and_pkcs12"), "*.p8", "*.p12"),
+                new FileChooser.ExtensionFilter(resources.getString("certificate-chooser.filter.pkcs12"), "*.p12"),
+                new FileChooser.ExtensionFilter(resources.getString("certificate-chooser.filter.pkcs8"), "*.p8"),
+                new FileChooser.ExtensionFilter(resources.getString("certificate-chooser.filter.all"), "*.*"));
 
         final File file = fileChooser.showOpenDialog(((Node) event.getSource()).getScene().getWindow());
 
@@ -378,17 +378,17 @@ public class ComposeNotificationController {
             try {
                 ApnsSigningKey.loadFromPkcs8File(file, "temp", "temp");
 
-                this.credentialsFileAndPasswordProperty.set(new Pair<>(file, null));
+                credentialsFileAndPasswordProperty.set(new Pair<>(file, null));
 
                 final Matcher matcher = APNS_SIGNING_KEY_WITH_ID_PATTERN.matcher(file.getName());
 
                 if (matcher.matches()) {
-                    if (StringUtils.isBlank(this.keyIdComboBox.getValue())) {
-                        this.keyIdComboBox.setValue(matcher.group(1));
-                        this.teamIdComboBox.requestFocus();
+                    if (StringUtils.isBlank(keyIdComboBox.getValue())) {
+                        keyIdComboBox.setValue(matcher.group(1));
+                        teamIdComboBox.requestFocus();
                     }
                 } else {
-                    this.keyIdComboBox.requestFocus();
+                    keyIdComboBox.requestFocus();
                 }
             } catch (final NoSuchAlgorithmException | IOException | InvalidKeyException e) {
                 // Couldn't load the given file as a signing key. Try it as a P12 certificate instead.
@@ -415,13 +415,13 @@ public class ComposeNotificationController {
                             throw new CertificateException("Certificate does not name any APNs topics.");
                         }
 
-                        this.credentialsFileAndPasswordProperty.set(new Pair<>(file, password));
+                        credentialsFileAndPasswordProperty.set(new Pair<>(file, password));
                     } catch (final IOException | KeyStoreException | CertificateException e1) {
                         final Alert alert = new Alert(Alert.AlertType.WARNING);
 
-                        alert.setTitle(this.resources.getString("alert.bad-certificate.title"));
-                        alert.setHeaderText(this.resources.getString("alert.bad-certificate.header"));
-                        alert.setContentText(this.resources.getString("alert.bad-certificate.content-text"));
+                        alert.setTitle(resources.getString("alert.bad-certificate.title"));
+                        alert.setHeaderText(resources.getString("alert.bad-certificate.header"));
+                        alert.setContentText(resources.getString("alert.bad-certificate.content-text"));
 
                         alert.show();
                     }
@@ -433,29 +433,29 @@ public class ComposeNotificationController {
     void handleNotificationSent() {
         final Preferences preferences = Preferences.userNodeForPackage(getClass());
 
-        preferences.put(MOST_RECENT_SERVER_KEY, this.apnsServerComboBox.getValue());
-        preferences.putInt(MOST_RECENT_PORT_KEY, this.apnsPortComboBox.getValue());
-        preferences.put(MOST_RECENT_DELIVERY_PRIORITY_KEY, this.deliveryPriorityComboBox.getValue().name());
+        preferences.put(MOST_RECENT_SERVER_KEY, apnsServerComboBox.getValue());
+        preferences.putInt(MOST_RECENT_PORT_KEY, apnsPortComboBox.getValue());
+        preferences.put(MOST_RECENT_DELIVERY_PRIORITY_KEY, deliveryPriorityComboBox.getValue().name());
 
-        if (StringUtils.isNotBlank(this.keyIdComboBox.getValue())) {
-            addCurrentValueToComboBoxItems(this.keyIdComboBox);
+        if (StringUtils.isNotBlank(keyIdComboBox.getValue())) {
+            addCurrentValueToComboBoxItems(keyIdComboBox);
         }
 
-        if (StringUtils.isNotBlank(this.teamIdComboBox.getValue())) {
-            addCurrentValueToComboBoxItems(this.teamIdComboBox);
+        if (StringUtils.isNotBlank(teamIdComboBox.getValue())) {
+            addCurrentValueToComboBoxItems(teamIdComboBox);
         }
 
-        addCurrentValueToComboBoxItems(this.topicComboBox);
-        addCurrentValueToComboBoxItems(this.deviceTokenComboBox);
+        addCurrentValueToComboBoxItems(topicComboBox);
+        addCurrentValueToComboBoxItems(deviceTokenComboBox);
 
-        if (StringUtils.isNotBlank(this.collapseIdComboBox.getValue())) {
-            addCurrentValueToComboBoxItems(this.collapseIdComboBox);
+        if (StringUtils.isNotBlank(collapseIdComboBox.getValue())) {
+            addCurrentValueToComboBoxItems(collapseIdComboBox);
         }
 
-        final String payload = this.payloadTextArea.getText();
+        final String payload = payloadTextArea.getText();
 
-        this.recentPayloads.remove(payload);
-        this.recentPayloads.add(0, payload);
+        recentPayloads.remove(payload);
+        recentPayloads.add(0, payload);
     }
 
     private void savePreferencesList(final String key, final List<?> values) {
@@ -488,18 +488,18 @@ public class ComposeNotificationController {
     }
 
     public ReadOnlyStringProperty apnsServerProperty() {
-        return this.apnsServerWrapper.getReadOnlyProperty();
+        return apnsServerWrapper.getReadOnlyProperty();
     }
 
     public ReadOnlyIntegerProperty apnsPortProperty() {
-        return this.apnsPortWrapper.getReadOnlyProperty();
+        return apnsPortWrapper.getReadOnlyProperty();
     }
 
     public ReadOnlyObjectProperty<ApnsCredentials> apnsCredentialsProperty() {
-        return this.apnsCredentialsWrapper.getReadOnlyProperty();
+        return apnsCredentialsWrapper.getReadOnlyProperty();
     }
 
     public ReadOnlyObjectProperty<ApnsPushNotification> pushNotificationProperty() {
-        return this.pushNotificationWrapper.getReadOnlyProperty();
+        return pushNotificationWrapper.getReadOnlyProperty();
     }
 }

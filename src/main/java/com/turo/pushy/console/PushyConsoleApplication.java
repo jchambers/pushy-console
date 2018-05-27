@@ -66,7 +66,7 @@ public class PushyConsoleApplication extends Application {
     public void start(final Stage primaryStage) throws Exception {
         final FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main.fxml"), RESOURCE_BUNDLE);
         final Parent root = fxmlLoader.load();
-        this.pushyConsoleController = fxmlLoader.getController();
+        pushyConsoleController = fxmlLoader.getController();
 
         primaryStage.setTitle(RESOURCE_BUNDLE.getString("pushy-console.title"));
         primaryStage.setScene(new Scene(root));
@@ -77,8 +77,8 @@ public class PushyConsoleApplication extends Application {
     public void stop() throws Exception {
         super.stop();
 
-        if (this.pushyConsoleController != null) {
-            this.pushyConsoleController.stop();
+        if (pushyConsoleController != null) {
+            pushyConsoleController.stop();
         }
     }
 }

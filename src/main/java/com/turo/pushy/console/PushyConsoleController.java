@@ -57,13 +57,13 @@ public class PushyConsoleController {
 
         notificationResultPriorityColumn.setCellValueFactory(cellDataFeatures -> new ReadOnlyStringWrapper(
                 cellDataFeatures.getValue().getPushNotification().getPriority() == DeliveryPriority.IMMEDIATE ?
-                        this.resources.getString("delivery-priority.immediate") :
-                        this.resources.getString("delivery-priority.conserve-power")));
+                        resources.getString("delivery-priority.immediate") :
+                        resources.getString("delivery-priority.conserve-power")));
 
         notificationResultStatusColumn.setCellValueFactory(cellDataFeatures -> new ReadOnlyStringWrapper(
                 cellDataFeatures.getValue().isAccepted() ?
-                        this.resources.getString("notification-result.status.accepted") :
-                        this.resources.getString("notification-result.status.rejected")));
+                        resources.getString("notification-result.status.accepted") :
+                        resources.getString("notification-result.status.rejected")));
 
         notificationResultDetailsColumn.setCellValueFactory(cellDataFeatures -> {
             final PushNotificationResponse<ApnsPushNotification> pushNotificationResponse = cellDataFeatures.getValue();
@@ -71,12 +71,12 @@ public class PushyConsoleController {
             final String details;
 
             if (pushNotificationResponse.isAccepted()) {
-                details = this.resources.getString("notification-result.details.accepted");
+                details = resources.getString("notification-result.details.accepted");
             } else {
                 if (pushNotificationResponse.getTokenInvalidationTimestamp() == null) {
                     details = pushNotificationResponse.getRejectionReason();
                 } else {
-                    details = new MessageFormat(this.resources.getString("notification-result.details.expiration")).format(
+                    details = new MessageFormat(resources.getString("notification-result.details.expiration")).format(
                             new Object[] {
                                     cellDataFeatures.getValue().getRejectionReason(),
                                     cellDataFeatures.getValue().getTokenInvalidationTimestamp() });
@@ -89,16 +89,16 @@ public class PushyConsoleController {
         notificationResultApnsIdColumn.setCellValueFactory(cellDataFeatures ->
                 new ReadOnlyStringWrapper(cellDataFeatures.getValue().getApnsId().toString()));
 
-        this.readyToSendProperty.bind(new BooleanBinding() {
+        readyToSendProperty.bind(new BooleanBinding() {
             {
-                super.bind(PushyConsoleController.this.composeNotificationController.apnsCredentialsProperty(),
-                        PushyConsoleController.this.composeNotificationController.pushNotificationProperty());
+                super.bind(composeNotificationController.apnsCredentialsProperty(),
+                        composeNotificationController.pushNotificationProperty());
             }
 
             @Override
             protected boolean computeValue() {
-                return PushyConsoleController.this.composeNotificationController.apnsCredentialsProperty().get() != null &&
-                        PushyConsoleController.this.composeNotificationController.pushNotificationProperty().get() != null;
+                return composeNotificationController.apnsCredentialsProperty().get() != null &&
+                        composeNotificationController.pushNotificationProperty().get() != null;
             }
         });
     }
@@ -107,18 +107,18 @@ public class PushyConsoleController {
     protected void handleSendNotificationButtonAction(final ActionEvent event) {
         final Scene scene = ((Node) event.getSource()).getScene();
 
-        if (this.readyToSendProperty.get()) {
+        if (readyToSendProperty.get()) {
             scene.getStylesheets().remove(PushyConsoleApplication.HIGHLIGHT_EMPTY_FIELDS_STYLESHEET);
 
-            this.composeNotificationController.handleNotificationSent();
+            composeNotificationController.handleNotificationSent();
 
             final Task<PushNotificationResponse<ApnsPushNotification>> sendNotificationTask = new Task<PushNotificationResponse<ApnsPushNotification>>() {
 
                 @Override
                 protected PushNotificationResponse<ApnsPushNotification> call() throws Exception {
-                    final String server = PushyConsoleController.this.composeNotificationController.apnsServerProperty().get();
-                    final int port = PushyConsoleController.this.composeNotificationController.apnsPortProperty().get();
-                    final ApnsCredentials credentials = PushyConsoleController.this.composeNotificationController.apnsCredentialsProperty().get();
+                    final String server = composeNotificationController.apnsServerProperty().get();
+                    final int port = composeNotificationController.apnsPortProperty().get();
+                    final ApnsCredentials credentials = composeNotificationController.apnsCredentialsProperty().get();
 
                     final ApnsClientBuilder apnsClientBuilder = new ApnsClientBuilder();
                     apnsClientBuilder.setApnsServer(server, port);
@@ -131,8 +131,7 @@ public class PushyConsoleController {
                     final ApnsClient apnsClient = apnsClientBuilder.build();
 
                     try {
-                        return apnsClient.sendNotification(
-                                PushyConsoleController.this.composeNotificationController.pushNotificationProperty().get()).get();
+                        return apnsClient.sendNotification(composeNotificationController.pushNotificationProperty().get()).get();
                     } finally {
                         apnsClient.close();
                     }
@@ -140,12 +139,12 @@ public class PushyConsoleController {
             };
 
             sendNotificationTask.setOnSucceeded(workerStateEvent ->
-                    this.notificationResultTableView.getItems().add(sendNotificationTask.getValue()));
+                    notificationResultTableView.getItems().add(sendNotificationTask.getValue()));
 
             sendNotificationTask.setOnFailed(workerStateEvent ->
                     reportPushNotificationError(sendNotificationTask.getException()));
 
-            this.sendNotificationExecutorService.execute(sendNotificationTask);
+            sendNotificationExecutorService.execute(sendNotificationTask);
         } else {
             scene.getStylesheets().add(PushyConsoleApplication.HIGHLIGHT_EMPTY_FIELDS_STYLESHEET);
         }
@@ -154,8 +153,8 @@ public class PushyConsoleController {
     private void reportPushNotificationError(final Throwable exception) {
         final Alert alert = new Alert(Alert.AlertType.WARNING);
 
-        alert.setTitle(this.resources.getString("alert.notification-failed.title"));
-        alert.setHeaderText(this.resources.getString("alert.notification-failed.header"));
+        alert.setTitle(resources.getString("alert.notification-failed.title"));
+        alert.setHeaderText(resources.getString("alert.notification-failed.header"));
         alert.setContentText(exception.getLocalizedMessage());
 
         final String stackTrace;
@@ -179,6 +178,6 @@ public class PushyConsoleController {
     }
 
     void stop() {
-        this.sendNotificationExecutorService.shutdown();
+        sendNotificationExecutorService.shutdown();
     }
 }

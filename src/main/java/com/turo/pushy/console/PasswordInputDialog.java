@@ -31,36 +31,34 @@ class PasswordInputDialog extends Dialog<String> {
         dialogPane.getStyleClass().add("text-input-dialog");
         dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        this.passwordField = new PasswordField();
-        this.passwordField.setMaxWidth(Double.MAX_VALUE);
+        passwordField = new PasswordField();
+        passwordField.setMaxWidth(Double.MAX_VALUE);
         GridPane.setHgrow(passwordField, Priority.ALWAYS);
         GridPane.setFillWidth(passwordField, true);
 
-        this.label = createLabel(dialogPane.getContentText());
-        this.label.textProperty().bind(dialogPane.contentTextProperty());
+        label = createLabel(dialogPane.getContentText());
+        label.textProperty().bind(dialogPane.contentTextProperty());
 
-        this.incorrectPasswordLabel = createLabel(PushyConsoleApplication.RESOURCE_BUNDLE.getString("password-dialog.incorrect-password"));
-        this.incorrectPasswordLabel.setVisible(false);
-        this.incorrectPasswordLabel.textProperty().addListener(o -> updateGrid());
+        incorrectPasswordLabel = createLabel(PushyConsoleApplication.RESOURCE_BUNDLE.getString("password-dialog.incorrect-password"));
+        incorrectPasswordLabel.setVisible(false);
+        incorrectPasswordLabel.textProperty().addListener(o -> updateGrid());
 
-        this.grid = new GridPane();
-        this.grid.setHgap(10);
-        this.grid.setVgap(8);
-        this.grid.setMaxWidth(Double.MAX_VALUE);
-        this.grid.setAlignment(Pos.CENTER_LEFT);
+        grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(8);
+        grid.setMaxWidth(Double.MAX_VALUE);
+        grid.setAlignment(Pos.CENTER_LEFT);
 
         updateGrid();
 
-        this.passwordField.textProperty().addListener((observable, oldValue, newValue) -> {
-            this.incorrectPasswordLabel.setVisible(false);
-        });
+        passwordField.textProperty().addListener((observable, oldValue, newValue) -> incorrectPasswordLabel.setVisible(false));
 
         dialogPane.lookupButton(ButtonType.OK).addEventFilter(ActionEvent.ACTION, event -> {
-            if (!passwordVerificationFunction.apply(this.passwordField.getText())) {
+            if (!passwordVerificationFunction.apply(passwordField.getText())) {
                 event.consume();
 
-                this.incorrectPasswordLabel.setVisible(true);
-                this.passwordField.selectAll();
+                incorrectPasswordLabel.setVisible(true);
+                passwordField.selectAll();
             }
         });
 
@@ -83,14 +81,14 @@ class PasswordInputDialog extends Dialog<String> {
     }
 
     private void updateGrid() {
-        this.grid.getChildren().clear();
+        grid.getChildren().clear();
 
-        this.grid.add(this.label, 0, 0);
-        this.grid.add(this.passwordField, 1, 0);
+        grid.add(label, 0, 0);
+        grid.add(passwordField, 1, 0);
 
-        this.grid.add(this.incorrectPasswordLabel, 0, 1, 2, 1);
-        getDialogPane().setContent(this.grid);
+        grid.add(incorrectPasswordLabel, 0, 1, 2, 1);
+        getDialogPane().setContent(grid);
 
-        Platform.runLater(this.passwordField::requestFocus);
+        Platform.runLater(passwordField::requestFocus);
     }
 }
