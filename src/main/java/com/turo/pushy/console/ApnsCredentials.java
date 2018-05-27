@@ -1,7 +1,6 @@
 package com.turo.pushy.console;
 
 import com.turo.pushy.apns.auth.ApnsSigningKey;
-import com.turo.pushy.console.util.CertificateUtil;
 import javafx.util.Pair;
 import org.apache.commons.lang3.StringUtils;
 
@@ -16,7 +15,7 @@ import java.util.Optional;
  * A set of APNs client credentials that may contain exactly one of an APNs client certificate/private key pair or an
  * APNs signing key.
  */
-public class ApnsCredentials {
+class ApnsCredentials {
 
     private final Pair<X509Certificate, PrivateKey> certificateAndPrivateKey;
 

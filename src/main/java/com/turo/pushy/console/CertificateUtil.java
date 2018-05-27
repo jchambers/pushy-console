@@ -1,4 +1,4 @@
-package com.turo.pushy.console.util;
+package com.turo.pushy.console;
 
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -19,10 +19,10 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 
-public class CertificateUtil {
+class CertificateUtil {
     private static final String TOPIC_OID = "1.2.840.113635.100.6.3.6";
 
-    public static KeyStore.PrivateKeyEntry getFirstPrivateKeyEntry(final File p12File, final String password) throws KeyStoreException, IOException {
+    static KeyStore.PrivateKeyEntry getFirstPrivateKeyEntry(final File p12File, final String password) throws KeyStoreException, IOException {
         final char[] passwordCharacters = password.toCharArray();
         final KeyStore keyStore = KeyStore.getInstance("PKCS12");
 
@@ -58,12 +58,12 @@ public class CertificateUtil {
         throw new KeyStoreException("Key store did not contain any private key entries suitable for use as APNs client credentials.");
     }
 
-    public static Set<String> extractApnsTopicsFromCertificate(final File certificateFile, final String password) throws IOException, KeyStoreException {
+    static Set<String> extractApnsTopicsFromCertificate(final File certificateFile, final String password) throws IOException, KeyStoreException {
         final KeyStore.PrivateKeyEntry privateKeyEntry = getFirstPrivateKeyEntry(certificateFile, password);
         return extractApnsTopicsFromCertificate(privateKeyEntry.getCertificate());
     }
 
-    public static Set<String> extractApnsTopicsFromCertificate(final Certificate certificate) throws IOException {
+    static Set<String> extractApnsTopicsFromCertificate(final Certificate certificate) throws IOException {
         final Set<String> topics = new HashSet<>();
 
         if (certificate instanceof X509Certificate) {
