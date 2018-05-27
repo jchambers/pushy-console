@@ -20,6 +20,11 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * A controller for the main pushy console window. The console controller delegates notification composition to a
+ * {@link ComposeNotificationController} and manages the actual transmission of push notifications and reporting of
+ * results.
+ */
 public class PushyConsoleController {
 
     @FXML private ResourceBundle resources;
@@ -41,6 +46,9 @@ public class PushyConsoleController {
 
     private final ExecutorService sendNotificationExecutorService = Executors.newSingleThreadExecutor();
 
+    /**
+     * Initializes the controller and its various controls and bindings.
+     */
     public void initialize() {
         notificationResultTopicColumn.setCellValueFactory(cellDataFeatures ->
                 new ReadOnlyStringWrapper(cellDataFeatures.getValue().getPushNotification().getTopic()));
@@ -102,7 +110,7 @@ public class PushyConsoleController {
     }
 
     @FXML
-    protected void handleSendNotificationButtonAction(final ActionEvent event) {
+    private void handleSendNotificationButtonAction(final ActionEvent event) {
         if (readyToSendProperty.get()) {
             composeNotificationController.handleNotificationSent();
 
