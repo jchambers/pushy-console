@@ -34,26 +34,35 @@ public class PushyConsoleApplication extends Application {
 
             final ResourceBundle bundle;
 
-            if ("java.class".equals(format)) {
-                bundle = super.newBundle(baseName, locale, format, loader, reload);
-            } else if ("java.properties".equals(format)) {
-                if (bundleName.contains("://")) {
-                    bundle = null;
-                } else {
-                    final String resourceName = toResourceName(bundleName, "properties");
+            switch (format) {
+                case "java.class": {
+                    bundle = super.newBundle(baseName, locale, format, loader, reload);
+                    break;
+                }
 
-                    try (final InputStream resourceInputStream = loader.getResourceAsStream(resourceName)) {
-                        if (resourceInputStream != null) {
-                            try (final InputStreamReader inputStreamReader = new InputStreamReader(resourceInputStream, StandardCharsets.UTF_8)){
-                                bundle = new PropertyResourceBundle(inputStreamReader);
+                case "java.properties": {
+                    if (bundleName.contains("://")) {
+                        bundle = null;
+                    } else {
+                        final String resourceName = toResourceName(bundleName, "properties");
+
+                        try (final InputStream resourceInputStream = loader.getResourceAsStream(resourceName)) {
+                            if (resourceInputStream != null) {
+                                try (final InputStreamReader inputStreamReader = new InputStreamReader(resourceInputStream, StandardCharsets.UTF_8)) {
+                                    bundle = new PropertyResourceBundle(inputStreamReader);
+                                }
+                            } else {
+                                bundle = null;
                             }
-                        } else {
-                            bundle = null;
                         }
                     }
+
+                    break;
                 }
-            } else {
-                throw new IllegalArgumentException("Unknown format: " + format);
+
+                default: {
+                    throw new IllegalArgumentException("Unknown format: " + format);
+                }
             }
 
             return bundle;
