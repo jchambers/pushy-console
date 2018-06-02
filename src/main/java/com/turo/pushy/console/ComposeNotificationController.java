@@ -31,7 +31,6 @@ import java.lang.reflect.Type;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -402,8 +401,11 @@ public class ComposeNotificationController {
                     try {
                         CertificateUtil.getFirstPrivateKeyEntry(file, password);
                         return true;
-                    } catch (final KeyStoreException | IOException e1) {
+                    } catch (final IOException e1) {
                         return false;
+                    } catch (KeyStoreException e1) {
+                        // We'll accept the password, but will need to alert the user that something else went wrong later
+                        return true;
                     }
                 });
 
@@ -418,7 +420,7 @@ public class ComposeNotificationController {
                 verifiedPassword.ifPresent(password -> {
                     try {
                         handleCertificateFileAndPasswordSelection(file, password);
-                    } catch (final IOException | KeyStoreException | CertificateException e1) {
+                    } catch (final IOException | KeyStoreException e1) {
                         final Alert alert = new Alert(Alert.AlertType.WARNING);
 
                         alert.setTitle(resources.getString("alert.bad-certificate.title"));
@@ -449,10 +451,9 @@ public class ComposeNotificationController {
         }
     }
 
-    void handleCertificateFileAndPasswordSelection(final File certificateFile, final String password) throws IOException, KeyStoreException, CertificateException {
-        if (CertificateUtil.extractApnsTopicsFromCertificate(certificateFile, password).isEmpty()) {
-            throw new CertificateException("Certificate does not name any APNs topics.");
-        }
+    void handleCertificateFileAndPasswordSelection(final File certificateFile, final String password) throws IOException, KeyStoreException {
+        // Try to actually load everything from the certificate so we can complain now if something goes wrong.
+        CertificateUtil.getFirstPrivateKeyEntry(certificateFile, password);
 
         credentialsFileAndPasswordProperty.set(new Pair<>(certificateFile, password));
     }
