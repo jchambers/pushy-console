@@ -28,3 +28,6 @@ hs_err_pid*
 # IntelliJ files
 .idea/
 *.iml
+
+# Metadata, backup files, and other detritus
+.DS_Store
