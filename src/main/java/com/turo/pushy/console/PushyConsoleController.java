@@ -26,9 +26,9 @@ public class PushyConsoleController {
 
     @FXML private ResourceBundle resources;
 
-    @FXML private ComposeNotificationController composeNotificationController;
+    @FXML ComposeNotificationController composeNotificationController;
 
-    @FXML private TableView<PushNotificationResponse<ApnsPushNotification>> notificationResultTableView;
+    @FXML TableView<PushNotificationResponse<ApnsPushNotification>> notificationResultTableView;
 
     @FXML private TableColumn<PushNotificationResponse<ApnsPushNotification>, String> notificationResultTopicColumn;
     @FXML private TableColumn<PushNotificationResponse<ApnsPushNotification>, String> notificationResultTokenColumn;
@@ -113,7 +113,7 @@ public class PushyConsoleController {
     }
 
     @FXML
-    private void handleSendNotificationButtonAction(final ActionEvent event) {
+    void handleSendNotificationButtonAction(final ActionEvent event) {
         if (readyToSendProperty.get()) {
             composeNotificationController.handleNotificationSent();
 
@@ -144,7 +144,7 @@ public class PushyConsoleController {
             };
 
             sendNotificationTask.setOnSucceeded(workerStateEvent ->
-                    notificationResultTableView.getItems().add(sendNotificationTask.getValue()));
+                    handlePushNotificationResponse(sendNotificationTask.getValue()));
 
             sendNotificationTask.setOnFailed(workerStateEvent ->
                     reportPushNotificationError(sendNotificationTask.getException()));
@@ -153,6 +153,10 @@ public class PushyConsoleController {
         } else {
             composeNotificationController.setRequiredFieldGroupHighlighted(true);
         }
+    }
+
+    void handlePushNotificationResponse(final PushNotificationResponse<ApnsPushNotification> pushNotificationPushNotificationResponse) {
+        notificationResultTableView.getItems().add(pushNotificationPushNotificationResponse);
     }
 
     private void reportPushNotificationError(final Throwable exception) {

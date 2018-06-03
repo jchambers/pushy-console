@@ -78,6 +78,8 @@ public class ComposeNotificationController {
 
     private final BooleanProperty requiredFieldGroupHighlightedProperty = new SimpleBooleanProperty();
 
+    private boolean saveComboBoxValues = true;
+
     private static final String MOST_RECENT_SERVER_KEY = "mostRecentServer";
     private static final String MOST_RECENT_PORT_KEY = "mostRecentPort";
     private static final String MOST_RECENT_DELIVERY_PRIORITY_KEY = "mostRecentDeliveryPriority";
@@ -466,29 +468,31 @@ public class ComposeNotificationController {
 
         final Preferences preferences = Preferences.userNodeForPackage(getClass());
 
-        preferences.put(MOST_RECENT_SERVER_KEY, apnsServerComboBox.getValue());
-        preferences.putInt(MOST_RECENT_PORT_KEY, apnsPortComboBox.getValue());
-        preferences.put(MOST_RECENT_DELIVERY_PRIORITY_KEY, deliveryPriorityComboBox.getValue().name());
+        if (saveComboBoxValues) {
+            preferences.put(MOST_RECENT_SERVER_KEY, apnsServerComboBox.getValue());
+            preferences.putInt(MOST_RECENT_PORT_KEY, apnsPortComboBox.getValue());
+            preferences.put(MOST_RECENT_DELIVERY_PRIORITY_KEY, deliveryPriorityComboBox.getValue().name());
 
-        if (StringUtils.isNotBlank(keyIdComboBox.getValue())) {
-            addCurrentValueToComboBoxItems(keyIdComboBox);
+            if (StringUtils.isNotBlank(keyIdComboBox.getValue())) {
+                addCurrentValueToComboBoxItems(keyIdComboBox);
+            }
+
+            if (StringUtils.isNotBlank(teamIdComboBox.getValue())) {
+                addCurrentValueToComboBoxItems(teamIdComboBox);
+            }
+
+            addCurrentValueToComboBoxItems(topicComboBox);
+            addCurrentValueToComboBoxItems(deviceTokenComboBox);
+
+            if (StringUtils.isNotBlank(collapseIdComboBox.getValue())) {
+                addCurrentValueToComboBoxItems(collapseIdComboBox);
+            }
+
+            final String payload = payloadTextArea.getText();
+
+            recentPayloads.remove(payload);
+            recentPayloads.add(0, payload);
         }
-
-        if (StringUtils.isNotBlank(teamIdComboBox.getValue())) {
-            addCurrentValueToComboBoxItems(teamIdComboBox);
-        }
-
-        addCurrentValueToComboBoxItems(topicComboBox);
-        addCurrentValueToComboBoxItems(deviceTokenComboBox);
-
-        if (StringUtils.isNotBlank(collapseIdComboBox.getValue())) {
-            addCurrentValueToComboBoxItems(collapseIdComboBox);
-        }
-
-        final String payload = payloadTextArea.getText();
-
-        recentPayloads.remove(payload);
-        recentPayloads.add(0, payload);
     }
 
     private void savePreferencesList(final String key, final List<?> values) {
@@ -638,5 +642,9 @@ public class ComposeNotificationController {
      */
     public BooleanProperty requiredFieldGroupHighlightedProperty() {
         return requiredFieldGroupHighlightedProperty;
+    }
+
+    void setSaveComboBoxValues(final boolean saveComboBoxValues) {
+        this.saveComboBoxValues = saveComboBoxValues;
     }
 }
