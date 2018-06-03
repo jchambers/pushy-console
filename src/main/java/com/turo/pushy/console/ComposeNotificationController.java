@@ -8,6 +8,7 @@ import com.turo.pushy.apns.ApnsPushNotification;
 import com.turo.pushy.apns.DeliveryPriority;
 import com.turo.pushy.apns.auth.ApnsSigningKey;
 import com.turo.pushy.apns.util.SimpleApnsPushNotification;
+import com.turo.pushy.apns.util.TokenUtil;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
@@ -338,8 +339,8 @@ public class ComposeNotificationController {
                 if (StringUtils.isNoneBlank(deviceToken, topic, payload)) {
                     final Date expiration = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
 
-                    pushNotification = new SimpleApnsPushNotification(deviceToken, topic, payload, expiration,
-                            deliveryPriority, StringUtils.trimToNull(collapseId));
+                    pushNotification = new SimpleApnsPushNotification(TokenUtil.sanitizeTokenString(deviceToken), topic,
+                            payload, expiration, deliveryPriority, StringUtils.trimToNull(collapseId));
                 } else {
                     pushNotification = null;
                 }

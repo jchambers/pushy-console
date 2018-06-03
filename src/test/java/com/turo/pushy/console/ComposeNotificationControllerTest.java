@@ -223,7 +223,8 @@ public class ComposeNotificationControllerTest {
                 composeNotificationController.getPushNotification().isPresent());
 
         final String topic = "com.example.topic";
-        final String token = "Example token";
+        final String token = "<3C3C1D11-9440927>";
+        final String sanitizedToken = "3C3C1D119440927";
         final String payload = "{}";
 
         composeNotificationController.topicComboBox.setValue(topic);
@@ -236,7 +237,7 @@ public class ComposeNotificationControllerTest {
         final ApnsPushNotification pushNotification = composeNotificationController.getPushNotification().get();
 
         assertEquals(topic, pushNotification.getTopic());
-        assertEquals(token, pushNotification.getToken());
+        assertEquals(sanitizedToken, pushNotification.getToken());
         assertEquals(payload, pushNotification.getPayload());
     }
 }
