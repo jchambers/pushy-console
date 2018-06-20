@@ -268,6 +268,10 @@ public class ComposeNotificationController {
         recentPayloads.addAll(loadPreferencesList(RECENT_PAYLOADS_KEY));
 
         recentPayloads.addListener((ListChangeListener<String>) change -> {
+            // Saving recent payloads in user preferences is a little different from saving other values, because
+            // payloads have a good chance of bumping up against the size limit of a user preferences value (8kB at the
+            // time of writing). The strategy here is to try to save as many recent payloads as we can, but back off
+            // one recent payload at a time if the whole list doesn't fit.
             int end = recentPayloads.size();
 
             while (end > 0) {
@@ -275,6 +279,8 @@ public class ComposeNotificationController {
                     preferences.put(RECENT_PAYLOADS_KEY, GSON.toJson(recentPayloads.subList(0, end)));
                     break;
                 } catch (final IllegalArgumentException e) {
+                    // The list of recent payloads won't fit in a user preferences slot; shave one recent payload from
+                    // the end of the list and try again.
                     end -= 1;
                 }
             }
