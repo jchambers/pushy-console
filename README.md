@@ -8,10 +8,9 @@ Pushy Console is intended as a tool for developers, and is primarily intended to
 
 ## Getting and running Pushy Console
 
-Pushy Console is currently distributed as a source-only project. To get Pushy Console, you'll need to clone the Pushy Console repository. Once you've done that, you can use [Maven](https://maven.apache.org/) to run Pushy Console from the command line:
+Pushy Console is currently distributed as a source-only project. To get Pushy Console, you'll need to clone the Pushy Console repository. Once you've done that, you can use [Maven](https://maven.apache.org/) to run Pushy Console from the command line. Assuming you're already in the Pushy Console directory:
 
 ```sh
-# From within the Pushy Console directory
 # Note: compilation only needs to happen once (or when the source code changes)
 mvn clean compile
 
