@@ -257,7 +257,7 @@ public class ComposeNotificationController {
                 final String smooshedPayload = payload.replaceAll("\\s+", " ");
                 final MenuItem menuItem = new MenuItem(smooshedPayload);
 
-                menuItem.setOnAction(event -> payloadTextArea.setText(payloadTextArea.getText() + payload));
+                menuItem.setOnAction(event -> payloadTextArea.setText(payload));
 
                 return menuItem;
             }).collect(Collectors.toList()));
