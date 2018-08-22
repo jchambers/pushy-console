@@ -12,8 +12,10 @@ Pushy Console is currently distributed as a source-only project. To get Pushy Co
 
 ```sh
 # Note: compilation only needs to happen once (or when the source code changes)
-mvn clean compile
+mvn clean package
 
+java -jar target/pushy-console-${version}.jar
+# or execute through maven
 mvn exec:java -Dexec.mainClass="com.turo.pushy.console.PushyConsoleApplication"
 ```
 
