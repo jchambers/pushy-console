@@ -11,11 +11,13 @@ Pushy Console is intended as a tool for developers, and is primarily intended to
 Pushy Console is currently distributed as a source-only project. To get Pushy Console, you'll need to clone the Pushy Console repository. Once you've done that, you can use [Maven](https://maven.apache.org/) to run Pushy Console from the command line. Assuming you're already in the Pushy Console directory:
 
 ```sh
-# Note: compilation only needs to happen once (or when the source code changes)
+# Compilation only needs to happen once (or when the source code changes)
 mvn clean package
 
+# Run Pushy Console from an executable .jar
 java -jar target/pushy-console-${version}.jar
-# or execute through maven
+
+# …or launch Pushy Console through Maven
 mvn exec:java -Dexec.mainClass="com.turo.pushy.console.PushyConsoleApplication"
 ```
 
