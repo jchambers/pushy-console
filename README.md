@@ -2,7 +2,7 @@
 
 Pushy Console is a simple GUI application for sending APNs (iOS/macOS/Safari) push notifications. It's built on the [Pushy library](https://github.com/relayrides/pushy) and is maintained by the engineers at [Turo](https://turo.com/).
 
-<div align="center"><img src="https://turo.github.io/pushy-console/img/pushy-console.png" width="712" alt="Pushy Console"/></div>
+<div align="center"><img src="https://user-images.githubusercontent.com/31352/39678967-b03ce3a8-5164-11e8-89d4-460121ba8e04.png" width="712" alt="Pushy Console"/></div>
 
 Pushy Console is intended as a tool for developers, and is primarily intended to provide an easy way to send single notifications to specific devices. It is _not_ intended as a tool for use in any production environment, for sending large numbers of notifications, or for automated use. Users who need to send lots of notifications quickly and efficiently should check out the [Pushy library](https://github.com/relayrides/pushy).
 
