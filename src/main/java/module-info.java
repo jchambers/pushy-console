@@ -8,8 +8,6 @@ module pushy.console {
     requires javafx.fxml;
     requires javafx.swing;
 
-    requires gson;
-
     requires org.apache.commons.lang3;
 
     requires pushy;

@@ -22,15 +22,15 @@
 
 package com.eatthepath.pushy.console;
 
+import com.eatthepath.json.JsonDeserializer;
+import com.eatthepath.json.JsonSerializer;
+import com.eatthepath.json.ParseException;
 import com.eatthepath.pushy.apns.ApnsClientBuilder;
 import com.eatthepath.pushy.apns.ApnsPushNotification;
 import com.eatthepath.pushy.apns.DeliveryPriority;
 import com.eatthepath.pushy.apns.auth.ApnsSigningKey;
 import com.eatthepath.pushy.apns.util.SimpleApnsPushNotification;
 import com.eatthepath.pushy.apns.util.TokenUtil;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
@@ -50,7 +50,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -113,9 +112,6 @@ public class ComposeNotificationController {
     private static final String RECENT_TOKENS_KEY = "recentTokens";
     private static final String RECENT_COLLAPSE_IDS_KEY = "recentCollapseIds";
     private static final String RECENT_PAYLOADS_KEY = "recentPayloads";
-
-    private static final Gson GSON = new Gson();
-    private static final Type STRING_LIST_TYPE = new TypeToken<List<String>>() {}.getType();
 
     private static final int MAX_COMBO_BOX_ITEMS = 10;
 
@@ -277,7 +273,7 @@ public class ComposeNotificationController {
 
             while (end > 0) {
                 try {
-                    preferences.put(RECENT_PAYLOADS_KEY, GSON.toJson(recentPayloads.subList(0, end)));
+                    preferences.put(RECENT_PAYLOADS_KEY, JsonSerializer.writeJsonTextAsString(recentPayloads.subList(0, end)));
                     break;
                 } catch (final IllegalArgumentException e) {
                     // The list of recent payloads won't fit in a user preferences slot; shave one recent payload from
@@ -304,7 +300,7 @@ public class ComposeNotificationController {
         apnsServerWrapper.bind(apnsServerComboBox.valueProperty());
         apnsPortWrapper.bind(apnsPortComboBox.valueProperty());
 
-        apnsCredentialsWrapper.bind(new ObjectBinding<ApnsCredentials>() {
+        apnsCredentialsWrapper.bind(new ObjectBinding<>() {
             {
                 super.bind(credentialsFileAndPasswordProperty,
                         keyIdComboBox.valueProperty(),
@@ -347,7 +343,7 @@ public class ComposeNotificationController {
             }
         });
 
-        pushNotificationWrapper.bind(new ObjectBinding<ApnsPushNotification>() {
+        pushNotificationWrapper.bind(new ObjectBinding<>() {
             {
                 super.bind(deviceTokenComboBox.valueProperty(),
                         topicComboBox.valueProperty(),
@@ -355,6 +351,7 @@ public class ComposeNotificationController {
                         deliveryPriorityComboBox.valueProperty(),
                         collapseIdComboBox.valueProperty());
             }
+
             @Override
             protected ApnsPushNotification computeValue() {
                 final String deviceToken = deviceTokenComboBox.getValue();
@@ -526,15 +523,16 @@ public class ComposeNotificationController {
     }
 
     private void savePreferencesList(final String key, final List<?> values) {
-        Preferences.userNodeForPackage(getClass()).put(key, GSON.toJson(values));
+        Preferences.userNodeForPackage(getClass()).put(key, JsonSerializer.writeJsonTextAsString(values));
     }
 
     private List<String> loadPreferencesList(final String key) {
         final Preferences preferences = Preferences.userNodeForPackage(getClass());
 
         try {
-            return GSON.fromJson(preferences.get(key, "[]"), STRING_LIST_TYPE);
-        } catch (final JsonSyntaxException e) {
+            //noinspection unchecked
+            return (List<String>) new JsonDeserializer().parseJsonObject(preferences.get(key, "[]"));
+        } catch (final ParseException e) {
             return new ArrayList<>();
         }
     }
