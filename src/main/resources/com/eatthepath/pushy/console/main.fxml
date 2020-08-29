@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <!--
-  ~ Copyright (c) 2018 Turo Inc.
+  ~ Copyright (c) 2018 Jon Chambers.
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy
   ~ of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@
   ~ THE SOFTWARE.
   -->
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="600.0" spacing="10.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.turo.pushy.console.PushyConsoleController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="600.0" spacing="10.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.eatthepath.pushy.console.PushyConsoleController">
    <children>
       <fx:include fx:id="composeNotification" source="compose-notification.fxml" />
       <AnchorPane VBox.vgrow="NEVER">

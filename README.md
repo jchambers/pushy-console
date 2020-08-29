@@ -1,8 +1,6 @@
 # Pushy Console
 
-Pushy Console is a simple GUI application for sending APNs (iOS/macOS/Safari) push notifications. It's built on the [Pushy library](https://github.com/relayrides/pushy) and is maintained by the engineers at [Turo](https://turo.com/).
-
-<div align="center"><img src="https://turo.github.io/pushy-console/img/pushy-console.png" width="712" alt="Pushy Console"/></div>
+Pushy Console is a simple GUI application for sending APNs (iOS/macOS/Safari) push notifications using the [Pushy library](https://github.com/relayrides/pushy).
 
 Pushy Console is intended as a tool for developers, and is primarily intended to provide an easy way to send single notifications to specific devices. It is _not_ intended as a tool for use in any production environment, for sending large numbers of notifications, or for automated use. Users who need to send lots of notifications quickly and efficiently should check out the [Pushy library](https://github.com/relayrides/pushy).
 
@@ -18,7 +16,7 @@ mvn clean package
 java -jar target/pushy-console-${version}.jar
 
 # …or launch Pushy Console through Maven
-mvn exec:java -Dexec.mainClass="com.turo.pushy.console.PushyConsoleApplication"
+mvn exec:java -Dexec.mainClass="com.eatthepath.pushy.console.PushyConsoleApplication"
 ```
 
 You can also run Pushy Console from within the IDE of your choice.

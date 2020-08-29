@@ -16,7 +16,7 @@
 <?import javafx.scene.text.Font?>
 
 <!--
-  ~ Copyright (c) 2018 Turo Inc.
+  ~ Copyright (c) 2018 Jon Chambers.
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy
   ~ of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,7 @@
   ~ THE SOFTWARE.
   -->
 
-<GridPane hgap="10.0" vgap="8.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.turo.pushy.console.ComposeNotificationController">
+<GridPane hgap="10.0" vgap="8.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.eatthepath.pushy.console.ComposeNotificationController">
   <columnConstraints>
     <ColumnConstraints halignment="RIGHT" hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />

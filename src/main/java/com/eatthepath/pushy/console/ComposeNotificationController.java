@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Turo Inc.
+ * Copyright (c) 2020 Jon Chambers.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,17 +20,17 @@
  * THE SOFTWARE.
  */
 
-package com.turo.pushy.console;
+package com.eatthepath.pushy.console;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-import com.turo.pushy.apns.ApnsClientBuilder;
-import com.turo.pushy.apns.ApnsPushNotification;
-import com.turo.pushy.apns.DeliveryPriority;
-import com.turo.pushy.apns.auth.ApnsSigningKey;
-import com.turo.pushy.apns.util.SimpleApnsPushNotification;
-import com.turo.pushy.apns.util.TokenUtil;
+import com.eatthepath.pushy.apns.ApnsClientBuilder;
+import com.eatthepath.pushy.apns.ApnsPushNotification;
+import com.eatthepath.pushy.apns.DeliveryPriority;
+import com.eatthepath.pushy.apns.auth.ApnsSigningKey;
+import com.eatthepath.pushy.apns.util.SimpleApnsPushNotification;
+import com.eatthepath.pushy.apns.util.TokenUtil;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
@@ -55,6 +55,8 @@ import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
@@ -365,7 +367,7 @@ public class ComposeNotificationController {
                 final ApnsPushNotification pushNotification;
 
                 if (StringUtils.isNoneBlank(deviceToken, topic, payload)) {
-                    final Date expiration = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
+                    final Instant expiration = Instant.now().plus(Duration.ofDays(1));
 
                     pushNotification = new SimpleApnsPushNotification(TokenUtil.sanitizeTokenString(deviceToken), topic,
                             payload, expiration, deliveryPriority, StringUtils.trimToNull(collapseId));
@@ -558,8 +560,8 @@ public class ComposeNotificationController {
      *
      * @return the currently-selected APNs server
      *
-     * @see com.turo.pushy.apns.ApnsClientBuilder#PRODUCTION_APNS_HOST
-     * @see com.turo.pushy.apns.ApnsClientBuilder#DEVELOPMENT_APNS_HOST
+     * @see com.eatthepath.pushy.apns.ApnsClientBuilder#PRODUCTION_APNS_HOST
+     * @see com.eatthepath.pushy.apns.ApnsClientBuilder#DEVELOPMENT_APNS_HOST
      */
     public final String getApnsServer() {
         return apnsServerWrapper.get();
@@ -581,8 +583,8 @@ public class ComposeNotificationController {
      *
      * @return the currently-selected APNs port
      *
-     * @see com.turo.pushy.apns.ApnsClientBuilder#DEFAULT_APNS_PORT
-     * @see com.turo.pushy.apns.ApnsClientBuilder#ALTERNATE_APNS_PORT
+     * @see com.eatthepath.pushy.apns.ApnsClientBuilder#DEFAULT_APNS_PORT
+     * @see com.eatthepath.pushy.apns.ApnsClientBuilder#ALTERNATE_APNS_PORT
      */
     public final int getApnsPort() {
         return apnsPortWrapper.get();

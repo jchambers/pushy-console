@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Turo Inc.
+ * Copyright (c) 2020 Jon Chambers.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,11 +20,11 @@
  * THE SOFTWARE.
  */
 
-package com.turo.pushy.console;
+package com.eatthepath.pushy.console;
 
-import com.turo.pushy.apns.ApnsPushNotification;
-import com.turo.pushy.apns.PushNotificationResponse;
-import com.turo.pushy.apns.util.SimpleApnsPushNotification;
+import com.eatthepath.pushy.apns.ApnsPushNotification;
+import com.eatthepath.pushy.apns.PushNotificationResponse;
+import com.eatthepath.pushy.apns.util.SimpleApnsPushNotification;
 import javafx.embed.swing.JFXPanel;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -35,7 +35,7 @@ import org.junit.*;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Date;
+import java.time.Instant;
 import java.util.ResourceBundle;
 import java.util.UUID;
 
@@ -142,7 +142,7 @@ public class PushyConsoleControllerTest {
             }
 
             @Override
-            public Date getTokenInvalidationTimestamp() {
+            public Instant getTokenInvalidationTimestamp() {
                 return null;
             }
         });

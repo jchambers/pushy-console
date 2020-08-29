@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Turo Inc.
+ * Copyright (c) 2020 Jon Chambers.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,9 +20,9 @@
  * THE SOFTWARE.
  */
 
-package com.turo.pushy.console;
+package com.eatthepath.pushy.console;
 
-import com.turo.pushy.apns.DeliveryPriority;
+import com.eatthepath.pushy.apns.DeliveryPriority;
 import javafx.scene.control.ListCell;
 
 import java.util.ResourceBundle;

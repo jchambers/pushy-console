@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Turo Inc.
+ * Copyright (c) 2020 Jon Chambers.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-package com.turo.pushy.console;
+package com.eatthepath.pushy.console;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -48,7 +48,7 @@ public class PushyConsoleApplication extends Application {
 
     // Based heavily upon https://softwarei18n.org/using-unicode-in-java-resource-bundles-6220776b6099
     static final ResourceBundle RESOURCE_BUNDLE =
-            ResourceBundle.getBundle("com/turo/pushy/console/pushy-console", new ResourceBundle.Control() {
+            ResourceBundle.getBundle("com/eatthepath/pushy/console/pushy-console", new ResourceBundle.Control() {
 
         @Override
         public ResourceBundle newBundle(final String baseName, final Locale locale, final String format, final ClassLoader loader, final boolean reload)

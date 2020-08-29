@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~ Copyright (c) 2018 Turo Inc.
+  ~ Copyright (c) 2018 Jon Chambers.
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy
   ~ of this software and associated documentation files (the "Software"), to deal
@@ -27,15 +27,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.turo</groupId>
+    <groupId>com.eatthepath</groupId>
     <artifactId>pushy-console</artifactId>
     <version>0.1-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
-            <groupId>com.turo</groupId>
+            <groupId>com.eatthepath</groupId>
             <artifactId>pushy</artifactId>
-            <version>0.13.1</version>
+            <version>0.14.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -100,7 +100,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.turo.pushy.console.PushyConsoleApplication</mainClass>
+                            <mainClass>com.eatthepath.pushy.console.PushyConsoleApplication</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
