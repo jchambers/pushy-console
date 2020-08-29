@@ -14,5 +14,6 @@ module pushy.console {
 
     requires pushy;
 
+    opens com.eatthepath.pushy.console to javafx.fxml;
     exports com.eatthepath.pushy.console;
 }
