@@ -22,7 +22,7 @@
 
 package com.eatthepath.pushy.console;
 
-import com.sun.javafx.scene.control.skin.resources.ControlResources;
+//import com.sun.javafx.scene.control.skin.resources.ControlResources;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
@@ -50,8 +50,9 @@ class PasswordInputDialog extends Dialog<String> {
         final DialogPane dialogPane = getDialogPane();
         dialogPane.contentTextProperty().addListener(o -> updateGrid());
 
-        setTitle(ControlResources.getString("Dialog.confirm.title"));
-        dialogPane.setHeaderText(ControlResources.getString("Dialog.confirm.header"));
+        // TODO
+        /* setTitle(ControlResources.getString("Dialog.confirm.title"));
+        dialogPane.setHeaderText(ControlResources.getString("Dialog.confirm.header")); */
         dialogPane.getStyleClass().add("text-input-dialog");
         dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
