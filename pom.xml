@@ -31,6 +31,10 @@
     <artifactId>pushy-console</artifactId>
     <version>0.1-SNAPSHOT</version>
 
+    <properties>
+        <javafx.version>14</javafx.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.eatthepath</groupId>
@@ -40,17 +44,17 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>14</version>
+            <version>${javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>14</version>
+            <version>${javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId>
-            <version>14</version>
+            <version>${javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
