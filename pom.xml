@@ -100,7 +100,7 @@
                 <version>0.0.4</version>
                 <configuration>
                     <release>12</release>
-                    <jlinkImageName>sandbox</jlinkImageName>
+                    <jlinkImageName>pushy-console</jlinkImageName>
                     <launcher>launcher</launcher>
                     <mainClass>pushy.console/com.eatthepath.pushy.console.PushyConsoleApplication</mainClass>
                 </configuration>
