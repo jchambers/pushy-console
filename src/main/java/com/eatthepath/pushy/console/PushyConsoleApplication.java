@@ -28,12 +28,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
-import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
 /**
@@ -47,51 +41,7 @@ public class PushyConsoleApplication extends Application {
     private PushyConsoleController pushyConsoleController;
 
     // Based heavily upon https://softwarei18n.org/using-unicode-in-java-resource-bundles-6220776b6099
-    static final ResourceBundle RESOURCE_BUNDLE =
-            ResourceBundle.getBundle("com/eatthepath/pushy/console/pushy-console", new ResourceBundle.Control() {
-
-        @Override
-        public ResourceBundle newBundle(final String baseName, final Locale locale, final String format, final ClassLoader loader, final boolean reload)
-                throws IllegalAccessException, InstantiationException, IOException {
-
-            final String bundleName = toBundleName(baseName, locale);
-
-            final ResourceBundle bundle;
-
-            switch (format) {
-                case "java.class": {
-                    bundle = super.newBundle(baseName, locale, format, loader, reload);
-                    break;
-                }
-
-                case "java.properties": {
-                    if (bundleName.contains("://")) {
-                        bundle = null;
-                    } else {
-                        final String resourceName = toResourceName(bundleName, "properties");
-
-                        try (final InputStream resourceInputStream = loader.getResourceAsStream(resourceName)) {
-                            if (resourceInputStream != null) {
-                                try (final InputStreamReader inputStreamReader = new InputStreamReader(resourceInputStream, StandardCharsets.UTF_8)) {
-                                    bundle = new PropertyResourceBundle(inputStreamReader);
-                                }
-                            } else {
-                                bundle = null;
-                            }
-                        }
-                    }
-
-                    break;
-                }
-
-                default: {
-                    throw new IllegalArgumentException("Unknown format: " + format);
-                }
-            }
-
-            return bundle;
-        }
-    });
+    static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("com/eatthepath/pushy/console/pushy-console");
 
     /**
      * Launches the Pushy Console application.

@@ -6,20 +6,11 @@ Pushy Console is intended as a tool for developers, and is primarily intended to
 
 ## Getting and running Pushy Console
 
-Pushy Console is currently distributed as a source-only project. To get Pushy Console, you'll need to clone the Pushy Console repository. Once you've done that, you can use [Maven](https://maven.apache.org/) to run Pushy Console from the command line. Assuming you're already in the Pushy Console directory:
+Pushy Console is currently distributed as a source-only project, and it requires Java 11 or newer to build and run. To get Pushy Console, you'll need to clone the Pushy Console repository. Once you've done that, you can use [Maven](https://maven.apache.org/) to run Pushy Console from the command line. Assuming you're already in the Pushy Console directory:
 
 ```sh
-# Compilation only needs to happen once (or when the source code changes)
-mvn clean package
-
-# Run Pushy Console from an executable .jar
-java -jar target/pushy-console-${version}.jar
-
-# …or launch Pushy Console through Maven
-mvn exec:java -Dexec.mainClass="com.eatthepath.pushy.console.PushyConsoleApplication"
+mvn javafx:run
 ```
-
-You can also run Pushy Console from within the IDE of your choice.
 
 ## Sending push notifications with Pushy Console
 

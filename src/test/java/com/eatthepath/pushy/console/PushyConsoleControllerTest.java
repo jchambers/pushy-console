@@ -119,7 +119,7 @@ public class PushyConsoleControllerTest {
         assertTrue("Notification table should be empty before receiving push notification response.",
                 pushyConsoleController.notificationResultTableView.getItems().isEmpty());
 
-        pushyConsoleController.handlePushNotificationResponse(new PushNotificationResponse<ApnsPushNotification>() {
+        pushyConsoleController.handlePushNotificationResponse(new PushNotificationResponse<>() {
 
             @Override
             public ApnsPushNotification getPushNotification() {

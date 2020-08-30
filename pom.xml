@@ -31,6 +31,10 @@
     <artifactId>pushy-console</artifactId>
     <version>0.1-SNAPSHOT</version>
 
+    <properties>
+        <javafx.version>14</javafx.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.eatthepath</groupId>
@@ -38,9 +42,19 @@
             <version>0.14.0</version>
         </dependency>
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.8.4</version>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>${javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -73,65 +87,37 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <source>11</source>
+                    <target>11</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.4</version>
+                <configuration>
+                    <release>11</release>
+                    <jlinkImageName>pushy-console</jlinkImageName>
+                    <launcher>launcher</launcher>
+                    <mainClass>pushy.console/com.eatthepath.pushy.console.PushyConsoleApplication</mainClass>
                 </configuration>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9.1</version>
+                <version>3.2.0</version>
                 <configuration>
                     <overview>${basedir}/src/main/java/overview.html</overview>
                     <show>public</show>
                     <links>
-                        <link>https://docs.oracle.com/javase/8/javafx/api/</link>
-                        <link>http://relayrides.github.io/pushy/apidocs/0.13/</link>
+                        <link>https://docs.oracle.com/en/java/javase/11/docs/api/</link>
+                        <link>https://openjfx.io/javadoc/14/</link>
                     </links>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.0</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>com.eatthepath.pushy.console.PushyConsoleApplication</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.1.1</version>
-
-                <configuration>
-                    <filters>
-                        <filter>
-                            <artifact>*:*</artifact>
-                            <excludes>
-                                <exclude>META-INF/*.SF</exclude>
-                                <exclude>META-INF/*.DSA</exclude>
-                                <exclude>META-INF/*.RSA</exclude>
-                            </excludes>
-                        </filter>
-                    </filters>
-                </configuration>
-
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
