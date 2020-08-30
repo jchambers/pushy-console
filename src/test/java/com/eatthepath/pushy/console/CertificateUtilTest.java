@@ -22,7 +22,6 @@
 
 package com.eatthepath.pushy.console;
 
-import com.eatthepath.pushy.console.CertificateUtil;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
@@ -56,7 +55,7 @@ public class CertificateUtilTest {
         final Set<String> topics = CertificateUtil.extractApnsTopicsFromCertificate(certificateFile, CERTIFICATE_PASSWORD);
 
         final Set<String> expectedTopics = new HashSet<>(Arrays.asList(
-                "com.relayrides.pushy", "com.relayrides.pushy.voip", "com.relayrides.pushy.complication"));
+                "com.eatthepath.pushy", "com.eatthepath.pushy.voip", "com.eatthepath.pushy.complication"));
 
         assertEquals(expectedTopics, topics);
     }

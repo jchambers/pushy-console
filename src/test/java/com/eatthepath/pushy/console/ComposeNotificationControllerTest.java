@@ -52,9 +52,9 @@ public class ComposeNotificationControllerTest {
     private static final String CERTIFICATE_FILENAME = "apns-client.p12";
     private static final String CERTIFICATE_PASSWORD = "pushy-test";
     private static final Set<String> CERTIFICATE_TOPICS = new HashSet<>(Arrays.asList(
-            "com.relayrides.pushy",
-            "com.relayrides.pushy.voip",
-            "com.relayrides.pushy.complication"));
+            "com.eatthepath.pushy",
+            "com.eatthepath.pushy.voip",
+            "com.eatthepath.pushy.complication"));
 
     private static final String STANDARD_NAME_SIGNING_KEY_FILENAME = "APNsAuthKey_KEYIDKEYID.p8";
     private static final String NONSTANDARD_NAME_SIGNING_KEY_FILENAME = "signing-key.p8";
