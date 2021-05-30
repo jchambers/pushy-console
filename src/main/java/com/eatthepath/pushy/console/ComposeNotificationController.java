@@ -26,6 +26,7 @@ import com.eatthepath.json.JsonSerializer;
 import com.eatthepath.pushy.apns.ApnsClientBuilder;
 import com.eatthepath.pushy.apns.ApnsPushNotification;
 import com.eatthepath.pushy.apns.DeliveryPriority;
+import com.eatthepath.pushy.apns.PushType;
 import com.eatthepath.pushy.apns.auth.ApnsSigningKey;
 import com.eatthepath.pushy.apns.util.SimpleApnsPushNotification;
 import com.eatthepath.pushy.apns.util.TokenUtil;
@@ -85,6 +86,7 @@ public class ComposeNotificationController {
     @FXML ComboBox<String> topicComboBox;
     @FXML ComboBox<String> deviceTokenComboBox;
     @FXML ComboBox<String> collapseIdComboBox;
+    @FXML ComboBox<PushType> notificationTypeComboBox;
     @FXML ComboBox<DeliveryPriority> deliveryPriorityComboBox;
     @FXML MenuButton recentPayloadsMenuButton;
     @FXML TextArea payloadTextArea;
@@ -107,6 +109,7 @@ public class ComposeNotificationController {
     private static final String MOST_RECENT_SERVER_KEY = "mostRecentServer";
     private static final String MOST_RECENT_PORT_KEY = "mostRecentPort";
     private static final String MOST_RECENT_DELIVERY_PRIORITY_KEY = "mostRecentDeliveryPriority";
+    private static final String MOST_RECENT_NOTIFICATION_TYPE_KEY = "mostRecentNotificationType";
     private static final String RECENT_KEY_IDS_KEY = "recentKeyIds";
     private static final String RECENT_TEAM_IDS_KEY = "recentTeamIds";
     private static final String RECENT_TOPICS_KEY = "recentTopics";
@@ -169,6 +172,24 @@ public class ComposeNotificationController {
             deliveryPriorityComboBox.setValue(DeliveryPriority.valueOf(preferences.get(MOST_RECENT_DELIVERY_PRIORITY_KEY, DeliveryPriority.IMMEDIATE.name())));
         } catch (final IllegalArgumentException e) {
             deliveryPriorityComboBox.setValue(DeliveryPriority.IMMEDIATE);
+        }
+
+        notificationTypeComboBox.setCellFactory(listView -> new NotificationTypeListCell());
+        notificationTypeComboBox.setButtonCell(new NotificationTypeListCell());
+
+        notificationTypeComboBox.setItems(FXCollections.observableArrayList(
+                PushType.ALERT,
+                PushType.BACKGROUND,
+                PushType.COMPLICATION,
+                PushType.FILEPROVIDER,
+                PushType.VOIP,
+                PushType.MDM
+        ));
+
+        try {
+            notificationTypeComboBox.setValue(PushType.valueOf(preferences.get(MOST_RECENT_NOTIFICATION_TYPE_KEY, PushType.ALERT.name())));
+        } catch (final IllegalArgumentException e) {
+            notificationTypeComboBox.setValue(PushType.ALERT);
         }
 
         recentTopicsProperty.set(FXCollections.observableArrayList(loadPreferencesList(RECENT_TOPICS_KEY)));
@@ -353,6 +374,7 @@ public class ComposeNotificationController {
                         topicComboBox.valueProperty(),
                         payloadTextArea.textProperty(),
                         deliveryPriorityComboBox.valueProperty(),
+                        notificationTypeComboBox.valueProperty(),
                         collapseIdComboBox.valueProperty());
             }
 
@@ -362,6 +384,7 @@ public class ComposeNotificationController {
                 final String topic = topicComboBox.getValue();
                 final String payload = payloadTextArea.getText();
                 final DeliveryPriority deliveryPriority = deliveryPriorityComboBox.getValue();
+                final PushType pushType = notificationTypeComboBox.getValue();
                 final String collapseId = collapseIdComboBox.getValue();
 
                 final ApnsPushNotification pushNotification;
@@ -370,7 +393,7 @@ public class ComposeNotificationController {
                     final Instant expiration = Instant.now().plus(Duration.ofDays(1));
 
                     pushNotification = new SimpleApnsPushNotification(TokenUtil.sanitizeTokenString(deviceToken), topic,
-                            payload, expiration, deliveryPriority, StringUtils.trimToNull(collapseId));
+                            payload, expiration, deliveryPriority, pushType, StringUtils.trimToNull(collapseId));
                 } else {
                     pushNotification = null;
                 }
@@ -503,6 +526,7 @@ public class ComposeNotificationController {
             preferences.put(MOST_RECENT_SERVER_KEY, apnsServerComboBox.getValue());
             preferences.putInt(MOST_RECENT_PORT_KEY, apnsPortComboBox.getValue());
             preferences.put(MOST_RECENT_DELIVERY_PRIORITY_KEY, deliveryPriorityComboBox.getValue().name());
+            preferences.put(MOST_RECENT_NOTIFICATION_TYPE_KEY, notificationTypeComboBox.getValue().name());
 
             if (StringUtils.isNotBlank(keyIdComboBox.getValue())) {
                 addCurrentValueToComboBoxItems(keyIdComboBox);

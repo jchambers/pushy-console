@@ -29,7 +29,7 @@
   ~ THE SOFTWARE.
   -->
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="600.0" spacing="10.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.eatthepath.pushy.console.PushyConsoleController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="600.0" spacing="10.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.eatthepath.pushy.console.PushyConsoleController">
    <children>
       <fx:include fx:id="composeNotification" source="compose-notification.fxml" />
       <AnchorPane VBox.vgrow="NEVER">
@@ -49,6 +49,7 @@
                   <TableColumn fx:id="notificationResultPayloadColumn" editable="false" prefWidth="100.0" sortable="false" text="%fxml.payload.label" />
                   <TableColumn fx:id="notificationResultCollapseIdColumn" editable="false" prefWidth="100.0" sortable="false" text="%fxml.collapse-id.label" />
                   <TableColumn fx:id="notificationResultPriorityColumn" editable="false" prefWidth="100.0" sortable="false" text="%fxml.priority.label" />
+                  <TableColumn fx:id="notificationResultTypeColumn" prefWidth="75.0" text="%fxml.type.label" />
                </columns></TableColumn>
           <TableColumn prefWidth="-1.0" text="%fxml.response.label">
                <columns>

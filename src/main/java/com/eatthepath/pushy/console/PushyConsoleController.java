@@ -35,6 +35,7 @@ import javafx.scene.control.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.MessageFormat;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -59,6 +60,7 @@ public class PushyConsoleController {
     @FXML private TableColumn<PushNotificationResponse<ApnsPushNotification>, String> notificationResultPayloadColumn;
     @FXML private TableColumn<PushNotificationResponse<ApnsPushNotification>, String> notificationResultCollapseIdColumn;
     @FXML private TableColumn<PushNotificationResponse<ApnsPushNotification>, String> notificationResultPriorityColumn;
+    @FXML private TableColumn<PushNotificationResponse<ApnsPushNotification>, String> notificationResultTypeColumn;
 
     @FXML private TableColumn<PushNotificationResponse<ApnsPushNotification>, String> notificationResultStatusColumn;
     @FXML private TableColumn<PushNotificationResponse<ApnsPushNotification>, String> notificationResultDetailsColumn;
@@ -92,6 +94,9 @@ public class PushyConsoleController {
                 cellDataFeatures.getValue().getPushNotification().getPriority() == DeliveryPriority.IMMEDIATE ?
                         resources.getString("delivery-priority.immediate") :
                         resources.getString("delivery-priority.conserve-power")));
+
+        notificationResultTypeColumn.setCellValueFactory(cellDataFeatures -> new ReadOnlyStringWrapper(
+                resources.getString("notification-type." + cellDataFeatures.getValue().getPushNotification().getPushType().name().toLowerCase(Locale.US))));
 
         notificationResultStatusColumn.setCellValueFactory(cellDataFeatures -> new ReadOnlyStringWrapper(
                 cellDataFeatures.getValue().isAccepted() ?
