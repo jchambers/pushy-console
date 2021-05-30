@@ -37,7 +37,7 @@
   ~ THE SOFTWARE.
   -->
 
-<GridPane hgap="10.0" vgap="8.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.eatthepath.pushy.console.ComposeNotificationController">
+<GridPane hgap="10.0" vgap="8.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.eatthepath.pushy.console.ComposeNotificationController">
   <columnConstraints>
     <ColumnConstraints halignment="RIGHT" hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity" />
     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -45,8 +45,10 @@
       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
   </columnConstraints>
   <rowConstraints>
+    <RowConstraints />
     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -55,39 +57,41 @@
       <RowConstraints minHeight="10.0" valignment="TOP" />
   </rowConstraints>
    <children>
-      <Label text="%fxml.apns-server.label" />
-      <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647">
+      <Label text="%fxml.apns-server.label" GridPane.rowIndex="1" />
+      <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="1">
          <children>
             <ComboBox fx:id="apnsServerComboBox" maxWidth="1.7976931348623157E308" prefWidth="270.0" GridPane.columnIndex="1" HBox.hgrow="ALWAYS" />
             <Label maxWidth="-Infinity" minWidth="-Infinity" text="%fxml.port.label" HBox.hgrow="NEVER" />
             <ComboBox fx:id="apnsPortComboBox" minWidth="-Infinity" prefWidth="80.0" HBox.hgrow="NEVER" />
          </children>
       </HBox>
-      <Label text="%fxml.credentials.label" GridPane.rowIndex="1" />
-      <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="1">
+      <Label text="%fxml.credentials.label" GridPane.rowIndex="2" />
+      <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="2">
          <children>
             <TextField fx:id="apnsCredentialFileTextField" editable="false" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" HBox.hgrow="ALWAYS" />
             <Button maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleBrowseButtonAction" text="%fxml.browse.label" HBox.hgrow="NEVER" />
          </children>
       </HBox>
-      <Label fx:id="keyIdLabel" disable="true" text="%fxml.key-id.label" GridPane.rowIndex="2" />
-      <ComboBox fx:id="keyIdComboBox" disable="true" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
-      <Label fx:id="teamIdLabel" disable="true" text="%fxml.team-id.label" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-      <ComboBox fx:id="teamIdComboBox" disable="true" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
-      <Separator prefWidth="200.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="3" />
-      <Label text="%fxml.topic.label" GridPane.rowIndex="4" />
-      <ComboBox fx:id="topicComboBox" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
-      <Label text="%fxml.token.label" GridPane.rowIndex="5" />
-      <ComboBox fx:id="deviceTokenComboBox" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="5" />
-      <Label text="%fxml.collapse-id.label" GridPane.rowIndex="6" />
-      <ComboBox fx:id="collapseIdComboBox" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="6" />
-      <Label text="%fxml.priority.label" GridPane.columnIndex="2" GridPane.rowIndex="6" />
-      <ComboBox fx:id="deliveryPriorityComboBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="6" />
-      <Label text="%fxml.payload.label" GridPane.rowIndex="7">
+      <Label fx:id="keyIdLabel" disable="true" text="%fxml.key-id.label" GridPane.rowIndex="3" />
+      <ComboBox fx:id="keyIdComboBox" disable="true" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
+      <Label fx:id="teamIdLabel" disable="true" text="%fxml.team-id.label" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+      <ComboBox fx:id="teamIdComboBox" disable="true" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
+      <Separator prefWidth="200.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
+      <Label text="%fxml.topic.label" GridPane.rowIndex="5" />
+      <ComboBox fx:id="topicComboBox" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="5" />
+      <Label text="%fxml.token.label" GridPane.rowIndex="6" />
+      <ComboBox fx:id="deviceTokenComboBox" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="6" />
+      <Label text="%fxml.collapse-id.label" GridPane.rowIndex="7" />
+      <ComboBox fx:id="collapseIdComboBox" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="7" />
+      <Label text="%fxml.priority.label" GridPane.rowIndex="8" />
+      <ComboBox fx:id="deliveryPriorityComboBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="8" />
+      <Label text="%fxml.type.label" GridPane.columnIndex="2" GridPane.rowIndex="8" />
+      <ComboBox fx:id="notificationTypeComboBox" maxWidth="1.7976931348623157E308" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" GridPane.rowIndex="8" />
+      <Label text="%fxml.payload.label" GridPane.rowIndex="9">
          <GridPane.margin>
             <Insets top="5.0" />
          </GridPane.margin></Label>
-      <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="7">
+      <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="9">
          <children>
             <MenuButton fx:id="recentPayloadsMenuButton" disable="true" mnemonicParsing="false" text="%fxml.recent-payloads.label" />
             <TextArea fx:id="payloadTextArea" prefRowCount="6">
