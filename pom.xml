@@ -32,7 +32,7 @@
     <version>0.1-SNAPSHOT</version>
 
     <properties>
-        <javafx.version>14</javafx.version>
+        <javafx.version>18</javafx.version>
     </properties>
 
     <dependencies>
