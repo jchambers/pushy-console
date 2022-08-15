@@ -1,8 +1,8 @@
 module pushy.console {
     requires java.prefs;
 
-    requires bcprov.jdk15on;
-    requires bcpkix.jdk15on;
+    requires org.bouncycastle.pkix;
+    requires org.bouncycastle.provider;
 
     requires com.eatthepath.pushy.apns;
 
