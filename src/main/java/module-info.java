@@ -4,6 +4,8 @@ module pushy.console {
     requires bcprov.jdk15on;
     requires bcpkix.jdk15on;
 
+    requires com.fasterxml.jackson.databind;
+
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.swing;

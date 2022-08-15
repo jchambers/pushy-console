@@ -22,15 +22,16 @@
 
 package com.eatthepath.pushy.console;
 
-import com.eatthepath.json.JsonDeserializer;
 import com.eatthepath.json.JsonSerializer;
-import com.eatthepath.json.ParseException;
 import com.eatthepath.pushy.apns.ApnsClientBuilder;
 import com.eatthepath.pushy.apns.ApnsPushNotification;
 import com.eatthepath.pushy.apns.DeliveryPriority;
 import com.eatthepath.pushy.apns.auth.ApnsSigningKey;
 import com.eatthepath.pushy.apns.util.SimpleApnsPushNotification;
 import com.eatthepath.pushy.apns.util.TokenUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
@@ -122,6 +123,9 @@ public class ComposeNotificationController {
 
     private static final String HIGHLIGHT_EMPTY_FIELDS_STYLESHEET =
             ComposeNotificationController.class.getResource("highlight-blank-fields.css").toExternalForm();
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final TypeReference<List<String>> STRING_LIST_TYPE_REFERENCE = new TypeReference<>() {};
 
     /**
      * Initializes the controller and its various controls and bindings.
@@ -530,9 +534,8 @@ public class ComposeNotificationController {
         final Preferences preferences = Preferences.userNodeForPackage(getClass());
 
         try {
-            //noinspection unchecked
-            return (List<String>) new JsonDeserializer().parseJsonObject(preferences.get(key, "[]"));
-        } catch (final ParseException e) {
+            return OBJECT_MAPPER.readValue(preferences.get(key, "[]"), STRING_LIST_TYPE_REFERENCE);
+        } catch (JsonProcessingException e) {
             return new ArrayList<>();
         }
     }
