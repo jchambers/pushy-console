@@ -39,7 +39,7 @@
         <dependency>
             <groupId>com.eatthepath</groupId>
             <artifactId>pushy</artifactId>
-            <version>0.14.0</version>
+            <version>0.15.1</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

@@ -106,14 +106,13 @@ public class PushyConsoleController {
             if (pushNotificationResponse.isAccepted()) {
                 details = resources.getString("notification-result.details.accepted");
             } else {
-                if (pushNotificationResponse.getTokenInvalidationTimestamp() == null) {
-                    details = pushNotificationResponse.getRejectionReason();
-                } else {
-                    details = new MessageFormat(resources.getString("notification-result.details.expiration")).format(
-                            new Object[] {
-                                    cellDataFeatures.getValue().getRejectionReason(),
-                                    cellDataFeatures.getValue().getTokenInvalidationTimestamp() });
-                }
+                final String rejectionReason = pushNotificationResponse.getRejectionReason()
+                        .orElseGet(() -> resources.getString("notification-result.status.rejected.reason-unknown"));
+
+                details = pushNotificationResponse.getTokenInvalidationTimestamp().map(expiration ->
+                                new MessageFormat(resources.getString("notification-result.details.expiration"))
+                                        .format(new Object[] {rejectionReason, expiration }))
+                        .orElse(rejectionReason);
             }
 
             return new ReadOnlyStringWrapper(details);
@@ -137,11 +136,11 @@ public class PushyConsoleController {
     }
 
     @FXML
-    void handleSendNotificationButtonAction(final ActionEvent event) {
+    void handleSendNotificationButtonAction(final ActionEvent ignored) {
         if (readyToSendProperty.get()) {
             composeNotificationController.handleNotificationSent();
 
-            final Task<PushNotificationResponse<ApnsPushNotification>> sendNotificationTask = new Task<PushNotificationResponse<ApnsPushNotification>>() {
+            final Task<PushNotificationResponse<ApnsPushNotification>> sendNotificationTask = new Task<>() {
 
                 @Override
                 protected PushNotificationResponse<ApnsPushNotification> call() throws Exception {

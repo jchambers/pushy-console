@@ -36,6 +36,7 @@ import org.junit.*;
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.UUID;
 
@@ -137,13 +138,18 @@ public class PushyConsoleControllerTest {
             }
 
             @Override
-            public String getRejectionReason() {
-                return null;
+            public int getStatusCode() {
+                return 200;
             }
 
             @Override
-            public Instant getTokenInvalidationTimestamp() {
-                return null;
+            public Optional<String> getRejectionReason() {
+                return Optional.empty();
+            }
+
+            @Override
+            public Optional<Instant> getTokenInvalidationTimestamp() {
+                return Optional.empty();
             }
         });
 
