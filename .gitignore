@@ -31,3 +31,10 @@ hs_err_pid*
 
 # Metadata, backup files, and other detritus
 .DS_Store
+
+# Temporary files
+*.swp
+
+# Secrets that the user might add
+*.pem
+*.p12

@@ -25,7 +25,7 @@ Before you can start sending push notifications, you'll need to follow the instr
 Pushy Console supports both certificate-based and token-based authentication with the APNs server. Either is just fine from Pushy Console's perspective, and you can have multiple certificates and signing keys in play elsewhere. From a practical perspective:
 
 - Certificates expire after a year, and can only be used for a specific set of topics associated with a single app. You'll usually need a password to "unlock" a certificate.
-- Signing keys never expire, and can be used for all topics associated with your developer account. You don't need a pasword to use signing keys, but will need to know they key ID and your Apple Developer Team ID.
+- Signing keys never expire, and can be used for all topics associated with your developer account. You don't need a password to use signing keys, but will need to know they key ID and your Apple Developer Team ID.
 
 You can choose a credentials file by clicking the "browse" button next to the "credentials" field in Pushy Console. If you choose a certificate, you'll be prompted for a password. If you choose a signing key, you'll need to provide a key ID and team ID.
 
