@@ -183,7 +183,8 @@ public class ComposeNotificationController {
                 PushType.COMPLICATION,
                 PushType.FILEPROVIDER,
                 PushType.VOIP,
-                PushType.MDM
+                PushType.MDM,
+                PushType.LIVE_ACTIVITY
         ));
 
         try {
