@@ -41,7 +41,7 @@ public class PushyConsoleApplication extends Application {
     private PushyConsoleController pushyConsoleController;
 
     // Based heavily upon https://softwarei18n.org/using-unicode-in-java-resource-bundles-6220776b6099
-    static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("com/eatthepath/pushy/console/pushy-console_en");
+    static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle("com/eatthepath/pushy/console/pushy-console");
 
     /**
      * Launches the Pushy Console application.
