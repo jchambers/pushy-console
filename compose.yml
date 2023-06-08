@@ -1,0 +1,22 @@
+---
+services:
+  # Base image
+  pushy-console-base:
+    build:
+      context: .
+      args:
+        - --rm
+      dockerfile: ./Dockerfile
+    working_dir: /root/workdir
+    environment:
+      DISPLAY: host.docker.internal:0.0
+      NO_AT_BRIDGE: 1
+    volumes:
+      - .:/root/workdir
+
+  # Run this target in Docker using `docker compose pushy-console`
+  # You need to run an XServer on your host - on windows you can use `VcXsvr`
+  pushy-console:
+    extends: pushy-console-base
+    command: mvn -s /usr/share/maven/ref/settings-docker.xml javafx:run
+    # command: bash  # can be used to lauch interactive shell

@@ -416,7 +416,7 @@ public class ComposeNotificationController {
                 }
             });
 
-            // Also set the psuedo class immediately based on the control's current state
+            // Also set the pseudo class immediately based on the control's current state
             comboBox.pseudoClassStateChanged(BLANK_PSEUDO_CLASS, StringUtils.isBlank(comboBox.getValue()));
         }
     }
@@ -432,7 +432,7 @@ public class ComposeNotificationController {
                 }
             });
 
-            // Also set the psuedo class immediately based on the control's current state
+            // Also set the pseudo class immediately based on the control's current state
             textInputControl.pseudoClassStateChanged(BLANK_PSEUDO_CLASS, StringUtils.isBlank(textInputControl.getText()));
         }
     }
